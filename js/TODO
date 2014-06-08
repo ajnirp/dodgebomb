@@ -1,4 +1,6 @@
 clamp motion to walls
 	bounce off walls or just stop at walls?
 implement jumping
+implement friction - done
+spotlight follows ball - done
 ground needs to look better
