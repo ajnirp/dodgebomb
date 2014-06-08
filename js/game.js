@@ -1,6 +1,8 @@
 /* http://buildnewgames.com/webgl-threejs/ */
+/* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
 var renderer, scene, camera, spotLight;
+var spotLights = new Array(8);
 
 var fieldWidth = 400, fieldHeight = 200;
 
@@ -24,7 +26,9 @@ function createScene() {
 
 	/* camera */
     camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-	camera.position.z = 420;
+    camera.position.z = 200;
+    camera.position.y = -400;
+    camera.rotation.x = 1.1;
 	scene.add(camera);
 
     renderer.setSize(WIDTH, HEIGHT);
@@ -32,77 +36,112 @@ function createScene() {
     container.appendChild(renderer.domElement);
 
     /* marble ball */
-    var radius = 10, segments = 16, rings = 16;
-    var ballGeometry = new THREE.SphereGeometry(radius, segments, rings);
-    var ballMaterial = new THREE.MeshPhongMaterial({  color: 0xff0000, transparent: true, opacity: 1 });
+    var ballRadius = 10, segments = 32, rings = 32;
+    var ballGeometry = new THREE.SphereGeometry(ballRadius, segments, rings);
+    // var ballMaterial = new THREE.MeshPhongMaterial({  color: 0xff0000, transparent: true, opacity: 0.8 });
+    var ballMaterial = new THREE.MeshPhongMaterial({  color: 0xff0000 });
 
     ball = new THREE.Mesh(ballGeometry, ballMaterial);
+    ball.position.z = ballRadius;
+    ball.position.x = 0;
+    ball.castShadow = true;
+    ball.acceleration = { x: 0, y: 0 };
+    ball.velocity = { x: 0, y: 0 };
+    ball.maxAcceleration = 2.5;
+    ball.maxVelocity = 5;
 
     scene.add(ball);
 
-	/* point light */
-	// var pointLight = new THREE.PointLight(0xffffff, 0.5);
-
-	// pointLight.position.x = 10;
-	// pointLight.position.y = 110;
-	// pointLight.position.z = 30;
-
-	// scene.add(pointLight);
-
-    spotLight = new THREE.SpotLight(0xF8D898);
-    spotLight.position.set(0, 0, 460);
-    spotLight.intensity = 1.5;
+    spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(0, 0, 170);
+    spotLight.intensity = .6;
+    spotLight.angle = Math.PI / 2;
     spotLight.castShadow = true;
+    spotLight.shadowCameraVisible = false;
+    spotLight.shadowDarkness = 0.1;
     scene.add(spotLight);
 
+    scene.add(new THREE.AmbientLight(0x101010));
+
+    // var spotLights = new Array(8);
+    for (var i = 0; i <= 8; i++) {
+        spotLights[i] = new THREE.SpotLight(0xF7F5BC);
+        spotLights[i].intensity = .2;
+        // spotLights[i].distance = 100;
+        spotLights[i].position.set(200 * Math.sin(i * Math.PI / 4),
+                                200 * Math.cos(i * Math.PI / 4),
+                                100);
+        spotLights[i].castShadow = true;
+        spotLights[i].shadowDarkness = 0.1;
+
+        scene.add(spotLights[i]);
+    };
+
+
     renderer.shadowMapEnabled = true;
+    renderer.shadowMapSoft = true;
 
-	/* plane */
-	var planeWidth = fieldWidth, planeHeight = fieldHeight, planeQuality = 10;
-
+    /* plane */
     var planeMaterial = new THREE.MeshLambertMaterial({ color: 0x51A8F5 });
-	// var plane = new THREE.Mesh(
-	// 	new THREE.PlaneGeometry(planeWidth,
-	// 		                    planeHeight,
-	// 		                    planeQuality,
-	// 		                    planeQuality),
-	// 	planeMaterial);
+
+    // var planeWidth = fieldWidth, planeHeight = fieldHeight, planeQuality = 10;
+    // var plane = new THREE.Mesh(
+    //  new THREE.PlaneGeometry(planeWidth,
+    //                          planeHeight,
+    //                          planeQuality,
+    //                          planeQuality),
+    //  planeMaterial);
     var plane = new THREE.Mesh(new THREE.CircleGeometry(200, 32), planeMaterial);
-    plane.position.z = -51;
 
     scene.add(plane);
     plane.receiveShadow = true;
-
-    /* table */
-    var tableMaterial = new THREE.MeshLambertMaterial({ color: 0x111111 });
-    // var table = new THREE.Mesh(
-    //     new THREE.CubeGeometry(planeWidth * 1.05,
-    //                            planeHeight * 1.03,
-    //                            100,
-    //                            planeQuality,
-    //                            planeQuality,
-    //                            1),
-    //     tableMaterial);
-    var table = new THREE.Mesh(new THREE.CircleGeometry(30, 32), tableMaterial);
-    table.position.z = -51;
-    scene.add(table);
-    table.receiveShadow = true;
+    // console.log(ball.position);
+    // console.log(plane.position);
+    // console.log(spotLights[1].position);
 }
 
 function draw() {
-	renderer.render(scene, camera);
-	// requestAnimationFrame(draw);
-	// ballPhysics();
+    renderer.render(scene, camera);
+    requestAnimationFrame(draw);
+
+    ballPhysics();
+    ballMovement();
 }
 
 function ballPhysics() {
+    var dt = 0.25;
+    // ball.position.x += ball.velocity.x*dt + 0.5*ball.acceleration.x*dt*dt;
+    // ball.position.y += ball.velocity.y*dt + 0.5*ball.acceleration.y*dt*dt;
+
+    ball.velocity.x += ball.acceleration.x * dt;
+    if (ball.velocity.x > ball.maxVelocity) { ball.velocity.x = ball.maxVelocity; }
+    if (ball.velocity.x < -ball.maxVelocity) { ball.velocity.x = -ball.maxVelocity; }
+    ball.velocity.y += ball.acceleration.y * dt;
+    if (ball.velocity.y > ball.maxVelocity) { ball.velocity.y = ball.maxVelocity; }
+    if (ball.velocity.y < -ball.maxVelocity) { ball.velocity.y = -ball.maxVelocity; }
+
+    ball.position.x += ball.velocity.x * dt;
+    ball.position.y += ball.velocity.y * dt;
+
+    var xx = ball.position.x;
+    var yy = ball.position.y;
+
+    // if (xx*xx + yy*yy >= 40000) { ball.acceleration.x =  }
+
+    console.log(ball.position);
+    console.log(ball.velocity);
+    console.log(ball.acceleration);
+    console.log("...");
 }
 
-function cameraPhysics() {
-    spotLight.position.x = ball.position.x * 2;
-    spotLight.position.y = ball.position.y * 2;
-    
-    camera.rotation.x = -0.01 * (ball.position.y) * Math.PI/180;
-    camera.rotation.y = -60 * Math.PI/180;
-    camera.rotation.z = -90 * Math.PI/180;
+function ballMovement() {
+    if (Key.isDown(Key.W)) {
+        ball.acceleration.y = ball.maxAcceleration;
+    } else if (Key.isDown(Key.S)) {
+        ball.acceleration.y = -ball.maxAcceleration;
+    } else if (Key.isDown(Key.A)) {
+        ball.acceleration.x = -ball.maxAcceleration;
+    } else if (Key.isDown(Key.D)) {
+        ball.acceleration.x = ball.maxAcceleration;
+    }
 }
