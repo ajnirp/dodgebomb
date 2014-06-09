@@ -62,18 +62,20 @@ function createScene() {
 
     /* central spotlight */
     spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(0, 0, 210);
+    // spotLight.position.set(0, 0, 210);
+    spotLight.position.set(0, 0, 200);
     // spotLight.position.set(0, 0, 500);
     spotLight.intensity = 1;
     spotLight.angle = Math.PI / 2;
     spotLight.castShadow = true;
     spotLight.shadowCameraVisible = false;
-    spotLight.shadowDarkness = 0.6;
+    spotLight.shadowDarkness = 1;
     scene.add(spotLight);
 
-    /* eight spotlights placed at equal distances along the perimeter */
+    /* ambient light */
     // scene.add(new THREE.AmbientLight(0x101010));
 
+    /* eight spotlights placed at equal distances along the perimeter */
     // for (var i = 0; i <= 8; i++) {
     //     spotLights[i] = new THREE.SpotLight(0xF7F5BC);
     //     spotLights[i].intensity = .2;
@@ -146,19 +148,8 @@ function ballPhysics() {
         ball.inTheAir = false;
     }
 
-    console.log(ball.position);
-    console.log(ball.velocity);
-    console.log(ball.acceleration);
-    console.log("...");
-
-    var xx = ball.position.x;
-    var yy = ball.position.y;
-
-    if (xx*xx + yy*yy > groundRadius*groundRadius + ballRadius*ballRadius + 10000) {
-        ball.position = { x: 0, y: 0, z: ballRadius };
-        ball.velocity = { x: 0, y: 0, z: 0 };
-        ball.inTheAir = false;
-    }
+    /* out of bounds check */
+    checkBallOutOfBounds();
 }
 
 function ballMovement() {
@@ -199,10 +190,31 @@ function cameraPhysics() {
     spotLight.target.position.x = ball.position.x;
     spotLight.target.position.y = ball.position.y;
 
-    camera.position.x = 0.5 * ball.position.x;
+    // camera.position.x = 0.5 * ball.position.x;
     camera.position.y = -400 + 0.5 * ball.position.y;
+    camera.rotation.y = - 0.003 * ball.position.x;
 }
 
 function noKeyPressed() {
-    return !((Key.isDown(W)) || (Key.isDown(A)) || (Key.isDown(S)) || (Key.isDown(D)) || Key.isDown(SPACE));
+    return !((Key.isDown(W)) ||
+             (Key.isDown(A)) ||
+             (Key.isDown(S)) ||
+             (Key.isDown(D)) ||
+             Key.isDown(SPACE));
+}
+
+function checkBallOutOfBounds() {
+    var xx = ball.position.x;
+    var yy = ball.position.y;
+
+    /* tolerance = 10,000 */
+    if (xx*xx + yy*yy > groundRadius*groundRadius + ballRadius*ballRadius + 10000) {
+        resetBall();
+    }
+}
+
+function resetBall() {
+    ball.position = { x: 0, y: 0, z: ballRadius };
+    ball.velocity = { x: 0, y: 0, z: 0 };
+    ball.inTheAir = false;
 }
