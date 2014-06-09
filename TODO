@@ -1,6 +1,7 @@
-clamp motion to walls
-	bounce off walls or just stop at walls?
-implement jumping
+implement out of bounds check - done
+implement jumping - done
 implement friction - done
 spotlight follows ball - done
+implement enemies
 ground needs to look better
+fix ground tilt on camera movement
