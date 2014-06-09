@@ -9,8 +9,12 @@ var cameraElevation = 200,
 
 var fieldWidth = 400, fieldHeight = 200;
 
+/* the humble protagonist of this game */
 var ball;
 var ballRadius = 10;
+
+/* enemies! */
+var enemies = new Array(0);
 
 var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
 var boundsTolerance = 20000,
@@ -19,8 +23,17 @@ var boundsTolerance = 20000,
 
 var ambientLight = new THREE.AmbientLight(0x101010);
 
+/* game stuff */
 var score = 0;
 var level = 1;
+var enemySpawnFrequency = 3000; // msec
+
+/* periodically spawn enemies */
+var intervalID = window.setInterval(function () {
+    var enemy = spawnEnemy();
+    enemies.push(enemy);
+    scene.add(enemy);
+}, enemySpawnFrequency);
 
 /* physics constants */
 var groundFriction = 0.7,
@@ -36,7 +49,6 @@ var VIEW_ANGLE = 50,
     FAR = 10000;
 
 function setup() {
-	// score = 0;
 	createScene();
 	draw();
 }
@@ -56,7 +68,7 @@ function createScene() {
     scene.add(camera);
 
     /* marble ball */
-    ball = setupBall();
+    ball = setupBall(ballRadius, 'red', { x: 0, y: 0, z: ballRadius }, { x: 0, y: 0, z: 0 });
     resetBall();
     scene.add(ball);
 
@@ -96,8 +108,11 @@ function draw() {
     }
 
     ballPhysics();
+    enemyPhysics();
+
     spotLightFollow();
     cameraFollow();
+
     ballMovement();
 }
 
@@ -107,7 +122,6 @@ function explosion(xx, yy) {
     explosionTexture.wrapS = explosionTexture.wrapT = THREE.RepeatWrapping;
     explosionTexture.repeat.set(10,10);
     var explosionMaterial = new THREE.MeshLambertMaterial({ map: explosionTexture, side: THREE.DoubleSide });
-    // var explosionMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
     var explosion = new THREE.Mesh(new THREE.CircleGeometry(ballRadius, 32), explosionMaterial);
     explosion.position = { x: xx, y: yy, z: ballRadius };
     explosion.rotation.x = Math.PI / 2;

@@ -1,9 +1,24 @@
-function setupBall() {
-    var segments = 32, rings = 32;
-    var ballGeometry = new THREE.SphereGeometry(ballRadius, segments, rings);
-    var ballMaterial = new THREE.MeshPhongMaterial({  color: 0xff0000 /*, transparent: true, opacity: 0.8*/ });
+/* initialise a ball */
+function setupBall(radius, ballColor, initialPos, initialVel) {
+    var ballGeometry = new THREE.SphereGeometry(radius, 16, 16);
+    var ballMaterial = new THREE.MeshPhongMaterial({  color: ballColor /*, transparent: true, opacity: 0.8*/ });
     b = new THREE.Mesh(ballGeometry, ballMaterial);
     b.castShadow = true;
+
+    /* initialise position */
+    if (typeof(initialPos) == 'undefined') {
+        b.position = { x: 0, y: 0, z: radius };
+    } else {
+        b.position = initialPos;
+    }
+
+    /* initialise velocity */
+    if (typeof(initialVel) == 'undefined') {
+        b.velocity = { x: 0, y: 10, z: 0 };
+    } else {
+        b.velocity = initialVel;
+    }
+
     return b;
 }
 
@@ -69,7 +84,6 @@ function ballPhysics() {
     if (x_acc_direction * ball.acceleration.x < 0) { ball.acceleration.x = 0; }
     if (y_acc_direction * ball.acceleration.y < 0) { ball.acceleration.y = 0; }
 
-
     /* new velocities */
     ball.velocity.x += ball.acceleration.x * dt;
     ball.velocity.y += ball.acceleration.y * dt;
@@ -97,15 +111,22 @@ function ballPhysics() {
     }
 
     /* out of bounds check */
-    checkBallOutOfBounds();
-}
-
-function checkBallOutOfBounds() {
-    var xx = ball.position.x;
-    var yy = ball.position.y;
-
-    var distance = xx*xx + yy*yy;
-    if (distance > bounds + boundsTolerance) {
+    if (outOfBounds(ball)) {
         resetBall();
     }
+}
+
+/* check if the ball b is outside the grounds */
+function outOfBounds(b) {
+    var xx = b.position.x;
+    var yy = b.position.y;
+    return xx*xx + yy*yy > bounds + boundsTolerance;
+}
+
+function noKeyPressed() {
+    return !((Key.isDown(Key.W)) ||
+             (Key.isDown(Key.A)) ||
+             (Key.isDown(Key.S)) ||
+             (Key.isDown(Key.D)) ||
+             Key.isDown(Key.SPACE));
 }
