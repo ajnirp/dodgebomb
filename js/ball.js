@@ -2,12 +2,14 @@
 function setupBall(radius, ballColor, initialPos, initialVel) {
     var ballGeometry = new THREE.SphereGeometry(radius, 16, 16);
     var ballMaterial = new THREE.MeshPhongMaterial({  color: ballColor /*, transparent: true, opacity: 0.8*/ });
+
     b = new THREE.Mesh(ballGeometry, ballMaterial);
     b.castShadow = true;
+    b.radius = radius;
 
     /* initialise position */
     if (typeof(initialPos) == 'undefined') {
-        b.position = { x: 0, y: 0, z: radius };
+        b.position = { x: 0, y: 0, z: b.radius };
     } else {
         b.position = initialPos;
     }
@@ -24,7 +26,7 @@ function setupBall(radius, ballColor, initialPos, initialVel) {
 
 /* place the ball a little above the center of the ground */
 function resetBall() {
-    ball.position = { x: 0, y: 0, z: ballRadius + 50 };
+    ball.position = { x: 0, y: 0, z: ballRadius + 200 };
     ball.acceleration = { x: 0, y: 0 };
     ball.velocity = { x: 0, y: 0, z: 0 };
     ball.maxAcceleration = 4;
@@ -73,9 +75,6 @@ function ballPhysics() {
 
     var x_friction = ball.velocity.x != 0 ? groundFriction : 0;
     var y_friction = ball.velocity.y != 0 ? groundFriction : 0;
-
-    // if (Math.abs(x_friction) > Math.abs(ball.acceleration.x)) { x_friction = Math.sign(x_friction) * Math.abs(ball.acceleration.x); }
-    // if (Math.abs(y_friction) > Math.abs(ball.acceleration.y)) { y_friction = Math.sign(y_friction) * Math.abs(ball.acceleration.y); }
 
     ball.acceleration.x -= x_acc_direction * x_friction;
     ball.acceleration.y -= y_acc_direction * y_friction;

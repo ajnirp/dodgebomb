@@ -33,9 +33,16 @@ function enemyPhysics() {
 	for (var i = 0 ; i < numEnemies ; i++) {
 		var currEnemy = enemies[i];
 		if (outOfBounds(currEnemy) || (currEnemy.velocity.x === 0 && currEnemy.velocity.y === 0)) {
-			scene.remove(currEnemy);
+			scene.remove(enemies[i]);
 			toRemove.push(i);
 		} else {
+			/* check for a collision */
+			if (collisionBetween(currEnemy, ball)) {
+				timeAliveInSec = 0;
+				resetBall();
+			}
+
+			/* move the enemy */
 			currEnemy.velocity.x += 0.001 * (ball.position.x - currEnemy.position.x);
 			currEnemy.velocity.y += 0.001 * (ball.position.y - currEnemy.position.y);
 
@@ -49,5 +56,15 @@ function enemyPhysics() {
 		enemies.splice(i, 1);
 	};
 
-	console.log(enemies.length);
+	// console.log(enemies.length);
+}
+
+function collisionBetween(b1, b2) {
+	var xx = b1.position.x - b2.position.x;
+	var yy = b1.position.y - b2.position.y;
+	var zz = b1.position.z - b2.position.z;
+
+	var min_distance = b1.radius + b2.radius;
+
+	return xx*xx + yy*yy + zz*zz <= min_distance*min_distance;
 }

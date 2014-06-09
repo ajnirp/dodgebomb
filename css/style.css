@@ -10,3 +10,9 @@ body {
 	margin-left: -320px;
 	margin-top: -240px;
 }
+
+h1 {
+	color: white;
+	text-align: center;
+	font-family: Arial;
+}

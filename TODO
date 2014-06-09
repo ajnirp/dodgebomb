@@ -1,8 +1,8 @@
 implement out of bounds check - done
 implement jumping - done
-implement friction - done
+implement friction - done? need to check. not sure about this one.
 spotlight follows ball - done
-implement enemies
+implement enemies - done, needs to be refined with a leveling system
 	enemies spawn randomly offscreen with an initial velocity
 	they have a bias towards the ball
 	enemy types
@@ -12,3 +12,16 @@ ground needs to look better - done, i guess
 fix ground tilt on camera movement - hacky, but done
 ball should explode when out of bounds - deferred
 implement bouncing - done
+implement collisions and death
+implement a leveling system
+implement a scoring system
+implement a 'you have been alive for x seconds' clock
+	should pause when displaying 'you died message'
+
+misc ideas
+as the level increases
+	the homing ability of the enemies increases
+	their size increases
+	the playing field shrinks (while remaining a circle)
+	the player's size increases?
+	the spotlight dims

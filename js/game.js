@@ -27,6 +27,7 @@ var ambientLight = new THREE.AmbientLight(0x101010);
 var score = 0;
 var level = 1;
 var enemySpawnFrequency = 3000; // msec
+var ballAlive = true;
 
 /* periodically spawn enemies */
 var intervalID = window.setInterval(function () {
@@ -75,8 +76,7 @@ function createScene() {
     /* central spotlight */
     spotLight = new THREE.SpotLight(0xffffff);
     // spotLight.position.set(0, 0, 210);
-    spotLight.position.set(0, 0, 210);
-    // spotLight.position.set(0, 0, 500);
+    spotLight.position.set(0, 0, 500);
     spotLight.intensity = 1;
     spotLight.angle = Math.PI / 2;
     spotLight.castShadow = true;
@@ -114,6 +114,8 @@ function draw() {
     cameraFollow();
 
     ballMovement();
+
+    console.log(ball.radius);
 }
 
 /* phataak boom */
