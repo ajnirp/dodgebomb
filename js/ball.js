@@ -70,8 +70,8 @@ function ballPhysics() {
     if (ball.position.z > ballRadius) { ball.inTheAir = true; }
 
     /* apply friction */
-    var x_acc_direction = Math.sign(ball.acceleration.x);
-    var y_acc_direction = Math.sign(ball.acceleration.y);
+    var x_acc_direction = THREE.Math.sign(ball.acceleration.x);
+    var y_acc_direction = THREE.Math.sign(ball.acceleration.y);
 
     var x_friction = ball.velocity.x != 0 ? groundFriction : 0;
     var y_friction = ball.velocity.y != 0 ? groundFriction : 0;
