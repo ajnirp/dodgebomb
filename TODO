@@ -3,5 +3,12 @@ implement jumping - done
 implement friction - done
 spotlight follows ball - done
 implement enemies
-ground needs to look better
-fix ground tilt on camera movement
+	enemies spawn randomly offscreen with an initial velocity
+	they have a bias towards the ball
+	enemy types
+		normal - move in a straight
+		magnetic - attracted towards the ball
+ground needs to look better - done, i guess
+fix ground tilt on camera movement - hacky, but done
+ball should explode when out of bounds - deferred
+implement bouncing - done
