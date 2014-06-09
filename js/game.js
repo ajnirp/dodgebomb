@@ -11,7 +11,6 @@ var ball, ballRadius;
 // var score;
 var groundFriction = 0.7,
     gravity = 1.5;
-// var groundFriction = 0;
 
 function setup() {
 	// score = 0;
@@ -64,6 +63,7 @@ function createScene() {
     /* central spotlight */
     spotLight = new THREE.SpotLight(0xffffff);
     spotLight.position.set(0, 0, 210);
+    // spotLight.position.set(0, 0, 500);
     spotLight.intensity = 1;
     spotLight.angle = Math.PI / 2;
     spotLight.castShadow = true;
@@ -151,10 +151,14 @@ function ballPhysics() {
     console.log(ball.acceleration);
     console.log("...");
 
-    // var xx = ball.position.x;
-    // var yy = ball.position.y;
+    var xx = ball.position.x;
+    var yy = ball.position.y;
 
-    // if (xx*xx + yy*yy >= 40000) { ball.acceleration.x =  }
+    if (xx*xx + yy*yy > groundRadius*groundRadius + ballRadius*ballRadius + 10000) {
+        ball.position = { x: 0, y: 0, z: ballRadius };
+        ball.velocity = { x: 0, y: 0, z: 0 };
+        ball.inTheAir = false;
+    }
 }
 
 function ballMovement() {
@@ -162,22 +166,28 @@ function ballMovement() {
         ball.acceleration.y = ball.maxAcceleration;
     } else if (Key.isDown(Key.S)) {
         ball.acceleration.y = -ball.maxAcceleration;
-    } else if (Key.isDown(Key.A)) {
+    }
+
+    if (Key.isDown(Key.A)) {
         ball.acceleration.x = -ball.maxAcceleration;
     } else if (Key.isDown(Key.D)) {
         ball.acceleration.x = ball.maxAcceleration;
-    } else if (Key.isDown(Key.Q)) {
+    }
+
+    if (Key.isDown(Key.Q)) {
         ball.velocity = { x: 0, y: 0, z: 0 };
         ball.acceleration = { x: 0, y: 0, z: 0 };
-    } else {
-        /* no acceleration unless a key is pressed */
-        ball.acceleration.x = 0;
-        ball.acceleration.y = 0;
     }
 
     if (Key.isDown(Key.SPACE)) {
         // if (ball.velocity.z == 0) { ball.velocity.z = 10; }
         if (!ball.inTheAir) { ball.velocity.z = 10; }
+    }
+
+    if (noKeyPressed()) {
+        /* no acceleration unless a key is pressed */
+        ball.acceleration.x = 0;
+        ball.acceleration.y = 0;
     }
 }
 
@@ -191,4 +201,8 @@ function cameraPhysics() {
 
     camera.position.x = 0.5 * ball.position.x;
     camera.position.y = -400 + 0.5 * ball.position.y;
+}
+
+function noKeyPressed() {
+    return !((Key.isDown(W)) || (Key.isDown(A)) || (Key.isDown(S)) || (Key.isDown(D)) || Key.isDown(SPACE));
 }
