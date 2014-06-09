@@ -7,9 +7,11 @@ var groundRadius = 250;
 
 var fieldWidth = 400, fieldHeight = 200;
 
-var ball;
+var ball, ballRadius;
 // var score;
-var groundFriction = 0.7;
+var groundFriction = 0.7,
+    gravity = 1.5;
+// var groundFriction = 0;
 
 function setup() {
 	// score = 0;
@@ -42,7 +44,8 @@ function createScene() {
     scene.add(camera);
 
     /* marble ball */
-    var ballRadius = 10, segments = 32, rings = 32;
+    ballRadius = 10;
+    var segments = 32, rings = 32;
     var ballGeometry = new THREE.SphereGeometry(ballRadius, segments, rings);
     var ballMaterial = new THREE.MeshPhongMaterial({  color: 0xff0000 /*, transparent: true, opacity: 0.8*/ });
 
@@ -51,12 +54,14 @@ function createScene() {
     ball.position.x = 0;
     ball.castShadow = true;
     ball.acceleration = { x: 0, y: 0 };
-    ball.velocity = { x: 0, y: 0 };
-    ball.maxAcceleration = 2.5;
+    ball.velocity = { x: 0, y: 0, z: 0 };
+    ball.maxAcceleration = 4;
     ball.maxVelocity = 5;
+    ball.inTheAir = false;
 
     scene.add(ball);
 
+    /* central spotlight */
     spotLight = new THREE.SpotLight(0xffffff);
     spotLight.position.set(0, 0, 210);
     spotLight.intensity = 1;
@@ -105,6 +110,8 @@ function draw() {
 function ballPhysics() {
     var dt = 0.25;
 
+    if (ball.position.z > ballRadius) { ball.inTheAir = true; }
+
     /* apply friction */
     var x_acc_direction = Math.sign(ball.acceleration.x);
     var y_acc_direction = Math.sign(ball.acceleration.y);
@@ -112,8 +119,9 @@ function ballPhysics() {
     var x_friction = ball.velocity.x != 0 ? groundFriction : 0;
     var y_friction = ball.velocity.y != 0 ? groundFriction : 0;
 
-    ball.acceleration.x -= (x_acc_direction * x_friction);
-    ball.acceleration.y -= (y_acc_direction * y_friction);
+    ball.acceleration.x -= x_acc_direction * x_friction;
+    ball.acceleration.y -= y_acc_direction * y_friction;
+    ball.acceleration.z = (ball.inTheAir ? gravity : 0);
 
     if (x_acc_direction * ball.acceleration.x < 0) { ball.acceleration.x = 0; }
     if (y_acc_direction * ball.acceleration.y < 0) { ball.acceleration.y = 0; }
@@ -121,6 +129,7 @@ function ballPhysics() {
     /* new velocities */
     ball.velocity.x += ball.acceleration.x * dt;
     ball.velocity.y += ball.acceleration.y * dt;
+    ball.velocity.z -= ball.acceleration.z * dt;
 
     /* clamp velocities */
     if (ball.velocity.x > ball.maxVelocity) { ball.velocity.x = ball.maxVelocity; }
@@ -131,6 +140,16 @@ function ballPhysics() {
     /* new positions */
     ball.position.x += ball.velocity.x * dt;
     ball.position.y += ball.velocity.y * dt;
+    ball.position.z += ball.velocity.z * dt;
+    if (ball.position.z < ballRadius) {
+        ball.position.z = ballRadius;
+        ball.inTheAir = false;
+    }
+
+    console.log(ball.position);
+    console.log(ball.velocity);
+    console.log(ball.acceleration);
+    console.log("...");
 
     // var xx = ball.position.x;
     // var yy = ball.position.y;
@@ -148,11 +167,17 @@ function ballMovement() {
     } else if (Key.isDown(Key.D)) {
         ball.acceleration.x = ball.maxAcceleration;
     } else if (Key.isDown(Key.Q)) {
-        ball.velocity = { x: 0, y: 0 };
-        ball.acceleration = { x: 0, y: 0 };
+        ball.velocity = { x: 0, y: 0, z: 0 };
+        ball.acceleration = { x: 0, y: 0, z: 0 };
     } else {
         /* no acceleration unless a key is pressed */
-        ball.acceleration = { x: 0, y: 0 };
+        ball.acceleration.x = 0;
+        ball.acceleration.y = 0;
+    }
+
+    if (Key.isDown(Key.SPACE)) {
+        // if (ball.velocity.z == 0) { ball.velocity.z = 10; }
+        if (!ball.inTheAir) { ball.velocity.z = 10; }
     }
 }
 
@@ -160,6 +185,7 @@ function cameraPhysics() {
     // spotLight.position.x = ball.position.x;
     // spotLight.position.y = ball.position.y;
 
+    /* spotlight position is fixed, but the spotlight focus follows the ball */
     spotLight.target.position.x = ball.position.x;
     spotLight.target.position.y = ball.position.y;
 

@@ -1,0 +1,12 @@
+body {
+	background-color: black;
+}
+#gameCanvas {
+	width: 640px;
+	height: 480px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-left: -320px;
+	margin-top: -240px;
+}
