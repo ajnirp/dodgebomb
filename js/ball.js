@@ -111,7 +111,7 @@ function ballPhysics() {
 
     /* out of bounds check */
     if (outOfBounds(ball)) {
-        resetBall();
+        youDied();
     }
 }
 

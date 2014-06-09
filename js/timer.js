@@ -10,3 +10,7 @@ function setTime() {
 		timeAliveInSec++;
 	}
 }
+
+function levelUp() {
+	
+}

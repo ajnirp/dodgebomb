@@ -18,6 +18,8 @@ implement a scoring system
 implement a 'you have been alive for x seconds' clock
 	should pause when displaying 'you died message'
 
+FIX TEARING!!!!!
+
 misc ideas
 as the level increases
 	the homing ability of the enemies increases

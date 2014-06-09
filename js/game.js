@@ -4,6 +4,7 @@
 var renderer, scene, camera, spotLight;
 var groundRadius = 250;
 
+/* camera constants */
 var cameraElevation = 200,
     cameraSetBack = -400;
 
@@ -21,7 +22,8 @@ var boundsTolerance = 20000,
     jumpTolerance = 5,
     ballInAirTolerance = 0.5;
 
-var ambientLight = new THREE.AmbientLight(0x101010);
+/* ambient light, needed for the super creepy flicker effect */
+// var ambientLight = new THREE.AmbientLight(0x101010);
 
 /* game stuff */
 var score = 0;
@@ -131,4 +133,9 @@ function explosion(xx, yy) {
     console.log(xx, yy);
     scene.add(explosion);
     return;
+}
+
+function youDied() {
+    timeAliveInSec = 0;
+    resetBall();
 }

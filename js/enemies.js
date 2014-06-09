@@ -38,8 +38,7 @@ function enemyPhysics() {
 		} else {
 			/* check for a collision */
 			if (collisionBetween(currEnemy, ball)) {
-				timeAliveInSec = 0;
-				resetBall();
+				youDied();
 			}
 
 			/* move the enemy */
@@ -55,8 +54,6 @@ function enemyPhysics() {
 	for (var i = 0 ; i < toRemove.length ; i++) {
 		enemies.splice(i, 1);
 	};
-
-	// console.log(enemies.length);
 }
 
 function collisionBetween(b1, b2) {
