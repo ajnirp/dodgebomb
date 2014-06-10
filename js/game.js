@@ -56,6 +56,9 @@ var VIEW_ANGLE = 50,
     NEAR = 0.1,
     FAR = 10000;
 
+/* Has the setup() function been called at least once? True if yes, else false */
+var setupDone = false;
+
 function setup() {
 	createScene();
 	draw();
@@ -97,11 +100,15 @@ function createScene() {
 
     scene.add(plane);
     plane.receiveShadow = true;
+
+    setupDone = true;
+    console.log('here1');
 }
 
 function draw() {
+    console.log('here2');
     renderer.render(scene, camera);
-    requestAnimationFrame(draw);
+    requestAnimationFrame(pollGamepads);
 
     if (level > 1) {
         spotLightFlicker();
@@ -117,6 +124,7 @@ function draw() {
 
     /* update stats */
     stats.update();
+    console.log('here3');
 }
 
 function youDied() {

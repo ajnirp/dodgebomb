@@ -1,5 +1,5 @@
-var currentControls = "keyboard";
-// var currentControls = "gamepad";
+// var currentControls = "keyboard";
+var currentControls = "gamepad";
 
 function upInput() {
 	if (currentControls === "keyboard") {
