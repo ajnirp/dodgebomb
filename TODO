@@ -18,7 +18,11 @@ implement a scoring system
 implement a 'you have been alive for x seconds' clock
 	should pause when displaying 'you died message'
 
-FIX TEARING!!!!!
+MAKE IT FASTER!!!
+	FIX TEARING!!!!! - deferred
+	display frame rate - done
+
+current goal - make gamepad work on sbrowser
 
 misc ideas
 as the level increases

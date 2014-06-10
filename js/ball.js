@@ -25,7 +25,7 @@ function setupBall(radius, ballColor, initialPos, initialVel) {
 }
 
 /* place the ball a little above the center of the ground */
-function resetBall() {
+function newBall() {
     ball.position = { x: 0, y: 0, z: ballRadius + 200 };
     ball.acceleration = { x: 0, y: 0 };
     ball.velocity = { x: 0, y: 0, z: 0 };
@@ -34,36 +34,6 @@ function resetBall() {
     ball.inTheAir = true;
 }
 
-function ballMovement() {
-    if (Key.isDown(Key.W)) {
-        ball.acceleration.y = ball.maxAcceleration;
-    } else if (Key.isDown(Key.S)) {
-        ball.acceleration.y = -ball.maxAcceleration;
-    }
-
-    if (Key.isDown(Key.A)) {
-        ball.acceleration.x = -ball.maxAcceleration;
-    } else if (Key.isDown(Key.D)) {
-        ball.acceleration.x = ball.maxAcceleration;
-    }
-
-    if (Key.isDown(Key.Q)) {
-        ball.velocity = { x: 0, y: 0, z: 0 };
-        ball.acceleration = { x: 0, y: 0, z: 0 };
-    }
-
-    if (Key.isDown(Key.SPACE)) {
-        if (Math.abs(ball.position.z - ballRadius) < jumpTolerance) {
-            ball.velocity.z = 10;
-        }
-    }
-
-    if (noKeyPressed()) {
-        /* no acceleration unless a key is pressed */
-        ball.acceleration.x = 0;
-        ball.acceleration.y = 0;
-    }
-}
 function ballPhysics() {
     var dt = 0.5;
 

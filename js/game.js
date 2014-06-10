@@ -1,6 +1,11 @@
 /* http://buildnewgames.com/webgl-threejs/ */
 /* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
+/* load stats: https://github.com/mrdoob/stats.js/blob/master/examples/basic.html */
+var stats = new Stats();
+stats.setMode(1);
+document.body.appendChild(stats.domElement);
+
 var renderer, scene, camera, spotLight;
 var groundRadius = 250;
 
@@ -32,11 +37,11 @@ var enemySpawnFrequency = 3000; // msec
 var ballAlive = true;
 
 /* periodically spawn enemies */
-var intervalID = window.setInterval(function () {
-    var enemy = spawnEnemy();
-    enemies.push(enemy);
-    scene.add(enemy);
-}, enemySpawnFrequency);
+// var intervalID = window.setInterval(function () {
+//     var enemy = spawnEnemy();
+//     enemies.push(enemy);
+//     scene.add(enemy);
+// }, enemySpawnFrequency);
 
 /* physics constants */
 var groundFriction = 0.7,
@@ -72,18 +77,11 @@ function createScene() {
 
     /* marble ball */
     ball = setupBall(ballRadius, 'red', { x: 0, y: 0, z: ballRadius }, { x: 0, y: 0, z: 0 });
-    resetBall();
+    newBall();
     scene.add(ball);
 
     /* central spotlight */
-    spotLight = new THREE.SpotLight(0xffffff);
-    // spotLight.position.set(0, 0, 210);
-    spotLight.position.set(0, 0, 500);
-    spotLight.intensity = 1;
-    spotLight.angle = Math.PI / 2;
-    spotLight.castShadow = true;
-    spotLight.shadowCameraVisible = false;
-    spotLight.shadowDarkness = 1;
+    spotLight = setupSpotLight();
     scene.add(spotLight);
 
     renderer.shadowMapEnabled = true;
@@ -93,8 +91,8 @@ function createScene() {
     var planeTexture = new THREE.ImageUtils.loadTexture('img/dirt.png');
     planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
     planeTexture.repeat.set(10,10);
-    // var planeMaterial = new THREE.MeshLambertMaterial({ color: 0x51A8F5 }); // old plane
-    var planeMaterial = new THREE.MeshLambertMaterial({ map: planeTexture, side: THREE.DoubleSide });
+    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0x51A8F5 }); // old plane
+    // var planeMaterial = new THREE.MeshLambertMaterial({ map: planeTexture, side: THREE.SingleSide });
     var plane = new THREE.Mesh(new THREE.CircleGeometry(groundRadius, 32), planeMaterial);
 
     scene.add(plane);
@@ -117,25 +115,11 @@ function draw() {
 
     ballMovement();
 
-    console.log(ball.radius);
-}
-
-/* phataak boom */
-function explosion(xx, yy) {
-    var explosionTexture = new THREE.ImageUtils.loadTexture('img/expl_01_0006.png');
-    explosionTexture.wrapS = explosionTexture.wrapT = THREE.RepeatWrapping;
-    explosionTexture.repeat.set(10,10);
-    var explosionMaterial = new THREE.MeshLambertMaterial({ map: explosionTexture, side: THREE.DoubleSide });
-    var explosion = new THREE.Mesh(new THREE.CircleGeometry(ballRadius, 32), explosionMaterial);
-    explosion.position = { x: xx, y: yy, z: ballRadius };
-    explosion.rotation.x = Math.PI / 2;
-    explosion.receiveShadow = true;
-    console.log(xx, yy);
-    scene.add(explosion);
-    return;
+    /* update stats */
+    stats.update();
 }
 
 function youDied() {
     timeAliveInSec = 0;
-    resetBall();
+    newBall();
 }

@@ -1,3 +1,16 @@
+function setupSpotLight() {
+	var temp_spotLight;
+	temp_spotLight = new THREE.SpotLight(0xffffff);
+    // temp_spotLight.position.set(0, 0, 210);
+    temp_spotLight.position.set(0, 0, 500);
+    temp_spotLight.intensity = 1;
+    temp_spotLight.angle = Math.PI / 2;
+    temp_spotLight.castShadow = true;
+    temp_spotLight.shadowCameraVisible = false;
+    temp_spotLight.shadowDarkness = 1;
+    return temp_spotLight;
+}
+
 /* spotlight position is fixed, but the spotlight focus follows the ball */
 function spotLightFollow() {
     spotLight.target.position.x = ball.position.x;
