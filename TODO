@@ -19,6 +19,12 @@ implement a 'you have been alive for x seconds' clock
 	should pause when displaying 'you died message'
 
 MAKE IT FASTER!!!
+	HUGE BUG - when running on personal laptop, the game invariably freezes every 3-4 seconds and the framerate drops to ~15, sometimes as low as 2 :(
+
+	remove persistent balls
+	remove texture repushing
+		cache geometries for a given radius
+		for that matter, since right now the radius is fixed, we might as well scrap the radius argument to setupBall()
 	FIX TEARING!!!!! - deferred
 	display frame rate - done
 
@@ -31,3 +37,5 @@ as the level increases
 	the playing field shrinks (while remaining a circle)
 	the player's size increases?
 	the spotlight dims
+
+separate physics.js file for ballPhysics() and enemyPhysics() ?

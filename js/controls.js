@@ -77,6 +77,7 @@ function ballMovement() {
     }
 
     if (Key.isDown(Key.Q)) {
+        // scene.remove(ball);
         ball.velocity = { x: 0, y: 0, z: 0 };
         ball.acceleration = { x: 0, y: 0, z: 0 };
     }

@@ -1,13 +1,12 @@
-function setupSpotLight() {
+function setupSpotLight(temp_spotLightHeight) {
 	var temp_spotLight;
 	temp_spotLight = new THREE.SpotLight(0xffffff);
-    // temp_spotLight.position.set(0, 0, 210);
-    temp_spotLight.position.set(0, 0, 500);
+    temp_spotLight.position.set(0, 0, temp_spotLightHeight);
     temp_spotLight.intensity = 1;
     temp_spotLight.angle = Math.PI / 2;
     temp_spotLight.castShadow = true;
     temp_spotLight.shadowCameraVisible = false;
-    temp_spotLight.shadowDarkness = 1;
+    // temp_spotLight.shadowDarkness = 0.5;
     return temp_spotLight;
 }
 

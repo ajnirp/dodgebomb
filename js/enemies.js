@@ -22,7 +22,7 @@ function spawnEnemy(speed) {
 
 	var spawnVel = { x: velX, y: velY, z: velZ };
 
-	return setupBall(ballRadius, 'grey', spawnPoint, spawnVel);
+	return setupBall(spawnPoint, spawnVel, enemyMaterial);
 }
 
 function enemyPhysics() {
@@ -51,6 +51,7 @@ function enemyPhysics() {
 	}
 
 	/* remove the marked enemies */
+	toRemove.sort(function (a,b) { return b - a; });
 	for (var i = 0 ; i < toRemove.length ; i++) {
 		enemies.splice(i, 1);
 	};

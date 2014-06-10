@@ -1,11 +1,10 @@
 /* initialise a ball */
-function setupBall(radius, ballColor, initialPos, initialVel) {
-    var ballGeometry = new THREE.SphereGeometry(radius, 16, 16);
-    var ballMaterial = new THREE.MeshPhongMaterial({  color: ballColor /*, transparent: true, opacity: 0.8*/ });
+function setupBall(initialPos, initialVel, material) {
+    var ballMaterial = material;
 
     b = new THREE.Mesh(ballGeometry, ballMaterial);
     b.castShadow = true;
-    b.radius = radius;
+    b.radius = ballRadius;
 
     /* initialise position */
     if (typeof(initialPos) == 'undefined') {

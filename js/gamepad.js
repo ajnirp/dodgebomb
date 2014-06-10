@@ -6,6 +6,9 @@
 // 	var interval = setInterval(pollGamepads, 500);
 // }
 
+/* which function should be used as the parameter to requestAnimationFrame? */
+var rAFCallback = pollGamepads;
+
 var aliveAnnouncementDiv = document.getElementById("aliveAnnouncement");
 aliveAnnouncementDiv.innerHTML = "You are using a " + (onMobile ? "mobile" : "non-mobile") + " device";
 
@@ -30,8 +33,11 @@ function pollGamepads() {
 	}
 	if (i === gamepads.length) {
 		/* no gamepads connected, defer to keyboard */
+		console.log("no gamepad found, using keyboard")
 		currentControls = "keyboard";
-		clearInterval(interval);
+		rAFCallback = draw;
+		draw();
+		// clearInterval(interval);
 	}
 }
 

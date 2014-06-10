@@ -2,11 +2,12 @@
 /* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
 /* load stats: https://github.com/mrdoob/stats.js/blob/master/examples/basic.html */
+// stats.setMode(1) to show ms by default
 var stats = new Stats();
-stats.setMode(1);
 document.body.appendChild(stats.domElement);
 
-var renderer, scene, camera, spotLight;
+var renderer, scene, camera;
+var spotLight, spotLightHeight = 500;
 var groundRadius = 250;
 
 /* camera constants */
@@ -15,15 +16,11 @@ var cameraElevation = 200,
 
 var fieldWidth = 400, fieldHeight = 200;
 
-/* the humble protagonist of this game */
-var ball;
-var ballRadius = 10;
-
 /* enemies! */
-var enemies = new Array(0);
+var enemies = [];
 
 var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
-var boundsTolerance = 20000,
+var boundsTolerance = 15000,
     jumpTolerance = 5,
     ballInAirTolerance = 0.5;
 
@@ -36,12 +33,12 @@ var level = 1;
 var enemySpawnFrequency = 3000; // msec
 var ballAlive = true;
 
-/* periodically spawn enemies */
-// var intervalID = window.setInterval(function () {
-//     var enemy = spawnEnemy();
-//     enemies.push(enemy);
-//     scene.add(enemy);
-// }, enemySpawnFrequency);
+// /* periodically spawn enemies */
+setInterval(function () {
+    var enemy = spawnEnemy();
+    enemies.push(enemy);
+    scene.add(enemy);
+}, enemySpawnFrequency);
 
 /* physics constants */
 var groundFriction = 0.7,
@@ -79,12 +76,12 @@ function createScene() {
     scene.add(camera);
 
     /* marble ball */
-    ball = setupBall(ballRadius, 'red', { x: 0, y: 0, z: ballRadius }, { x: 0, y: 0, z: 0 });
+    ball = setupBall({ x: 0, y: 0, z: ballRadius }, { x: 0, y: 0, z: 0 }, ballRedMaterial);
     newBall();
     scene.add(ball);
 
     /* central spotlight */
-    spotLight = setupSpotLight();
+    spotLight = setupSpotLight(spotLightHeight);
     scene.add(spotLight);
 
     renderer.shadowMapEnabled = true;
@@ -102,17 +99,15 @@ function createScene() {
     plane.receiveShadow = true;
 
     setupDone = true;
-    console.log('here1');
 }
 
 function draw() {
-    console.log('here2');
     renderer.render(scene, camera);
-    requestAnimationFrame(pollGamepads);
+    requestAnimationFrame(rAFCallback);
 
-    if (level > 1) {
-        spotLightFlicker();
-    }
+    // if (level > 1) {
+    //     spotLightFlicker();
+    // }
 
     ballPhysics();
     enemyPhysics();
@@ -124,7 +119,6 @@ function draw() {
 
     /* update stats */
     stats.update();
-    console.log('here3');
 }
 
 function youDied() {
