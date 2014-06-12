@@ -7,6 +7,7 @@ var stats = new Stats();
 document.body.appendChild(stats.domElement);
 
 var renderer, scene, camera;
+// var spotLight, spotLightHeight = 210;
 var spotLight, spotLightHeight = 500;
 var groundRadius = 250;
 
@@ -20,9 +21,6 @@ var fieldWidth = 400, fieldHeight = 200;
 var enemies = [];
 
 var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
-var boundsTolerance = 15000,
-    jumpTolerance = 5,
-    ballInAirTolerance = 0.5;
 
 /* ambient light, needed for the super creepy flicker effect */
 // var ambientLight = new THREE.AmbientLight(0x101010);
@@ -31,14 +29,24 @@ var boundsTolerance = 15000,
 var score = 0;
 var level = 1;
 var enemySpawnFrequency = 3000; // msec
+var enemyCleanupFrequency = 15000; // msec
 var ballAlive = true;
 
-// /* periodically spawn enemies */
-setInterval(function () {
-    var enemy = spawnEnemy();
-    enemies.push(enemy);
-    scene.add(enemy);
-}, enemySpawnFrequency);
+/* periodically spawn enemies */
+// setInterval(function () {
+//     var enemy = spawnEnemy();
+//     enemies.push(enemy);
+//     scene.add(enemy);
+// }, enemySpawnFrequency);
+// /* periodically clean up all stationary enemies */
+// setInterval(function () {
+//     for (var i = enemies.length - 1; i >= 0; i--) {
+//         if (enemies[i].velocity.x === 0 && enemies.velocity.y === 0) {
+//             scene.remove(enemies[i]);
+//             enemies.splice(i,1);
+//         }
+//     };
+// }, enemyCleanupFrequency);
 
 /* physics constants */
 var groundFriction = 0.7,
@@ -53,75 +61,81 @@ var VIEW_ANGLE = 50,
     NEAR = 0.1,
     FAR = 10000;
 
-/* Has the setup() function been called at least once? True if yes, else false */
-var setupDone = false;
-
-function setup() {
-	createScene();
-	draw();
-}
-
-function createScene() {
-    /* set up renderer and attach it to the relevant DOM element */
-	var container = document.getElementById("gameCanvas");
+function setupScene() {
+    /* set up renderer */
 	renderer = new THREE.WebGLRenderer();
-    renderer.setSize(WIDTH, HEIGHT);
-    container.appendChild(renderer.domElement);
+  renderer.setSize(WIDTH, HEIGHT);
 
-    /* initialise a new scene */
-    scene = new THREE.Scene();
+  /* and attach it to the relevant DOM element */
+  var container = document.getElementById("gameCanvas");
+  container.appendChild(renderer.domElement);
 
-    /* camera */
-    camera = setupCamera();
-    scene.add(camera);
+  /* initialise a new scene */
+  scene = new THREE.Scene();
 
-    /* marble ball */
-    ball = setupBall({ x: 0, y: 0, z: ballRadius }, { x: 0, y: 0, z: 0 }, ballRedMaterial);
-    newBall();
-    scene.add(ball);
+  /* camera */
+  camera = setupCamera();
+  scene.add(camera);
 
-    /* central spotlight */
-    spotLight = setupSpotLight(spotLightHeight);
-    scene.add(spotLight);
+  /* marble ball */
+  ball = setupBall({ x: 0, y: 0, z: ballRadius },
+                   { x: 0, y: 0, z: 0 },
+                   ballRedMaterial);
+  newBall();
+  scene.add(ball);
 
-    renderer.shadowMapEnabled = true;
-    renderer.shadowMapSoft = true;
+  /* central spotlight */
+  spotLight = new THREE.SpotLight(0xffffff);
+  spotLight.position.set(0, 0, spotLightHeight);
+  spotLight.intensity = 1;
+  spotLight.angle = Math.PI / 2;
+  spotLight.castShadow = true;
+  spotLight.shadowCameraVisible = false;
+  // spotLight.shadowDarkness = 0.5;
+  scene.add(spotLight);
 
-    /* plane */
-    var planeTexture = new THREE.ImageUtils.loadTexture('img/dirt.png');
-    planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
-    planeTexture.repeat.set(10,10);
-    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0x51A8F5 }); // old plane
-    // var planeMaterial = new THREE.MeshLambertMaterial({ map: planeTexture, side: THREE.SingleSide });
-    var plane = new THREE.Mesh(new THREE.CircleGeometry(groundRadius, 32), planeMaterial);
+  /* plane */
+  var plane = setupPlane();
+  scene.add(plane);
 
-    scene.add(plane);
-    plane.receiveShadow = true;
+  renderer.shadowMapEnabled = true;
+  renderer.shadowMapSoft = true;
 
-    setupDone = true;
+  plane.receiveShadow = true;
 }
 
-function draw() {
-    renderer.render(scene, camera);
-    requestAnimationFrame(rAFCallback);
+function draw(gamepadSnapshot) {
+  renderer.render(scene, camera);
+  ballPhysics();
+  enemyPhysics();
+ 
+  /* spotlight position is fixed
+   * but its focus is towards the ball, always */
+  spotLight.target.position.x = ball.position.x;
+  spotLight.target.position.y = ball.position.y;
 
-    // if (level > 1) {
-    //     spotLightFlicker();
-    // }
+  /* Camera moves with the ball (though not at the same pace) */
+  camera.position.y = cameraSetBack + 0.5 * ball.position.y;
+  camera.rotation.y = - 0.003 * ball.position.x;
 
-    ballPhysics();
-    enemyPhysics();
+  /* Move the ball */
+  ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];
+  ball.acceleration.y = -ball.maxAcceleration * gamepadSnapshot.axes[1];
+  /* negative sign for y acceleration because on the joystick the
+   * y value is negative when the joystick is pushed up, and the game
+   * uses the opposite convention */
 
-    spotLightFollow();
-    cameraFollow();
+  if (gamepadSnapshot.buttons[0].pressed) {
+    if (Math.abs(ball.position.z - ballRadius) < jumpTolerance) {
+        ball.velocity.z = 10;
+    }
+  }
 
-    ballMovement();
-
-    /* update stats */
-    stats.update();
+  /* Update the FPS counter */
+  stats.update();
 }
 
 function youDied() {
-    timeAliveInSec = 0;
-    newBall();
+  timeAliveInSec = 0;
+  newBall();
 }
