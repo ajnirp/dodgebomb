@@ -9,7 +9,7 @@ document.body.appendChild(stats.domElement);
 var renderer, scene, camera;
 // var spotLight, spotLightHeight = 210;
 var spotLight, spotLightHeight = 500;
-var groundRadius = 250;
+var groundRadius = 300;
 
 /* camera constants */
 var cameraElevation = 200,
