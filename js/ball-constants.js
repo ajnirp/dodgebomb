@@ -10,3 +10,8 @@ var ballGeometry = new THREE.SphereGeometry(ballRadius, 12, 6);
 var boundsTolerance = 15000,
     jumpTolerance = 5,
     ballInAirTolerance = 0.5;
+
+var deathCauseEnum = {
+	ENEMY_CONTACT: 0,
+	FELL_OFF_EDGE: 1
+}

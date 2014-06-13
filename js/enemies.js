@@ -1,34 +1,26 @@
-function spawnEnemy(speed) {
-  var angle = Math.random() * 2 * Math.PI;
+function isOffscreen(enemy) {
+  var origin = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
+  var direction = new THREE.Vector3(enemy.position.x - camera.position.x, enemy.position.y - camera.position.y, enemy.position.z - camera.position.z);
+  raycaster.set(origin, direction.normalize());
+  var intersections = raycaster.intersectObject(enemy);
 
-  /* enemies spawn slightly outside the perimeter of the ground */
-  var spawnX = 1.02 * groundRadius * Math.cos(angle),
-      spawnY = 1.02 * groundRadius * Math.sin(angle);
-  var spawnPoint = { x: spawnX, y: spawnY, z: ballRadius };
+  // console.log(origin.x + " " + origin.y + " " + origin.z);
+  // console.log(direction.x + " " + direction.y + " " + direction.z);
+  // console.log(enemy.position);
 
-  spawnIndicator(spawnPoint);
-
-  /* set spawn speed
-   * as the level increases, the enemies get faster */
-  if (typeof(speed) == 'undefined') {
-    speed = 4;
-  }
-
-  var velX = -spawnX,
-      velY = -spawnY,
-      velZ = 0;
-
-  var invSqrtXY = Math.pow(velX*velX + velY*velY, 0.5);
-  velX *= speed / invSqrtXY;
-  velY *= speed / invSqrtXY;
-
-  var spawnVel = { x: velX, y: velY, z: velZ };
-
-  return setupBall(spawnPoint, spawnVel, enemyMaterial);
+  return (intersections.length == 0);
 }
 
-function spawnIndicator(spawnPoint) { 
-}
+// function spawnIndicator(enemy) {
+//   var geometry = new THREE.Geometry();
+//   var v1 = new THREE.Vector3();
+//   var v2 = new THREE.Vector3();
+//   var v3 = new THREE.Vector3();
+//   geometry.vertices.push(v1);
+//   geometry.vertices.push(v2);
+//   geometry.vertices.push(v3);
+//   var indicator = 
+// }
 
 function enemyPhysics() {
   var dt = 0.5;
@@ -43,11 +35,12 @@ function enemyPhysics() {
       (currEnemy.velocity.x == 0 && currEnemy.velocity.y == 0)) {
       scene.remove(currEnemy);
       delete enemies[key];
+      delete indicators[key];
     }
     else {
       /* check for a collision */
       if (collisionBetween(currEnemy, ball)) {
-        youDied();
+        youDied(deathCauseEnum.ENEMY_CONTACT);
       }
 
       /* move the enemy */
@@ -58,38 +51,6 @@ function enemyPhysics() {
       currEnemy.position.y += currEnemy.velocity.y * dt;
     }
   }
-
-  // var toRemove = [];
-  // var numEnemies = enemies.length;
-  // for (var i = 0 ; i < numEnemies ; i++) {
-  //   var currEnemy = enemies[i];
-  //   var xx = currEnemy.position.x;
-  //   var yy = currEnemy.position.y;
-  //   if ((xx*xx + yy*yy > bounds + boundsTolerance) ||
-  //     (currEnemy.velocity.x === 0 && currEnemy.velocity.y === 0))
-  //   {
-  //     scene.remove(enemies[i]);
-  //     toRemove.push(i);
-  //   } else {
-  //     /* check for a collision */
-  //     if (collisionBetween(currEnemy, ball)) {
-  //       youDied();
-  //     }
-
-  //     /* move the enemy */
-  //     currEnemy.velocity.x += 0.001 * (ball.position.x - currEnemy.position.x);
-  //     currEnemy.velocity.y += 0.001 * (ball.position.y - currEnemy.position.y);
-
-  //     currEnemy.position.x += currEnemy.velocity.x * dt;
-  //       currEnemy.position.y += currEnemy.velocity.y * dt;
-  //   }
-  // }
-
-  // /* remove the marked enemies */
-  // toRemove.sort(function (a,b) { return b - a; });
-  // for (var i = 0 ; i < toRemove.length ; i++) {
-  //   enemies.splice(i, 1);
-  // };
 }
 
 function collisionBetween(b1, b2) {

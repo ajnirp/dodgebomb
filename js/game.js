@@ -5,21 +5,19 @@
 var stats = new Stats();
 document.body.appendChild(stats.domElement);
 
-var renderer, scene, camera;
+var renderer;
+var camera;
+var scene;
 var spotLight;
-var groundRadius = 400;
-
-/* camera constants */
-var cameraElevation = 200,
-    cameraSetBack = -400;
-
-var fieldWidth = 400, fieldHeight = 200;
 
 /* enemies! */
-var enemies = {};
-var enemyId = 0;
 
-var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
+// JSON object storing the enemies
+var enemies = {};
+// each enemy gets a unique ID
+var enemyId = 0;
+// each enemy gets a green arrow indicating where they are
+var indicators = {};
 
 /* ambient light, needed for the super creepy flicker effect */
 // var ambientLight = new THREE.AmbientLight(0x101010);
@@ -27,31 +25,19 @@ var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
 /* game stuff */
 var score = 0;
 var level = 1;
-var enemySpawnFrequency = 3000; // msec
-var enemyCleanupFrequency = 15000; // msec
 var ballAlive = true;
 
 /* periodically spawn enemies */
-setInterval(function () {
-    var enemy = spawnEnemy();
-    enemy.id = enemyId++;
-    enemies[enemyId] = enemy;
-    scene.add(enemy);
-}, enemySpawnFrequency);
-// /* periodically clean up all stationary enemies */
-setInterval(function () {
-    for (var i = enemies.length - 1; i >= 0; i--) {
-        if (enemies[i].velocity.x === 0 && enemies.velocity.y === 0) {
-            scene.remove(enemies[i]);
-            enemies.splice(i,1);
-        }
-    };
-}, enemyCleanupFrequency);
-
-/* physics constants */
-var groundFriction = 0.7,
-    gravity = 1.5,
-    groundRestitutionCoefficient = 0.5;
+setInterval(spawnEnemy, enemySpawnFrequency);
+/* periodically clean up all stationary enemies */
+// setInterval(function () {
+//     for (var i = enemies.length - 1; i >= 0; i--) {
+//         if (enemies[i].velocity.x === 0 && enemies.velocity.y === 0) {
+//             scene.remove(enemies[i]);
+//             enemies.splice(i,1);
+//         }
+//     };
+// }, enemyCleanupFrequency);
 
 /* GL constants */
 var WIDTH = 640, 
@@ -103,6 +89,8 @@ function setupScene() {
   var plane = new THREE.Mesh(bufferGeometry, planeMaterial);
   scene.add(plane);
 
+  // spawnEnemy();
+
   // renderer.shadowMapEnabled = true;
   // renderer.shadowMapSoft = true;
 }
@@ -148,7 +136,50 @@ function draw(gamepadSnapshot) {
   stats.update();
 }
 
-function youDied() {
-  timeAliveInSec = 0;
-  newBall();
+function youDied(deathCause) {
+  if (deathCause === deathCauseEnum.FELL_OFF_EDGE) {
+    fallOffEdgeAnimation();
+  }
+  else {
+    timeAliveInSec = 0;
+    newBall();
+  }
+}
+
+function setupEnemy(speed) {
+  var angle = Math.random() * 2 * Math.PI;
+
+  /* enemies spawn slightly outside the perimeter of the ground */
+  var spawnX = 1.02 * groundRadius * Math.cos(angle),
+      spawnY = 1.02 * groundRadius * Math.sin(angle);
+  var spawnPoint = { x: spawnX, y: spawnY, z: ballRadius };
+
+  /* set spawn speed
+   * as the level increases, the enemies get faster */
+  if (typeof(speed) == 'undefined') {
+    speed = 4;
+  }
+
+  var velX = -spawnX,
+      velY = -spawnY,
+      velZ = 0;
+
+  var invSqrtXY = Math.pow(velX*velX + velY*velY, 0.5);
+  velX *= speed / invSqrtXY;
+  velY *= speed / invSqrtXY;
+
+  var spawnVel = { x: velX, y: velY, z: velZ };
+
+  return setupBall(spawnPoint, spawnVel, enemyMaterial);
+}
+
+function spawnEnemy() {
+  var enemy = setupEnemy();
+  enemy.id = enemyId++;
+  enemies[enemyId] = enemy;
+  // enemy.position = { x: 50, y: 0, z: ballRadius };
+  // enemy.velocity = { x: 0, y: 0, z: 0 };
+  // enemy.position = { x: 1000, y: 0, z: ballRadius };
+  // console.log(isOffscreen(ball) + "..");
+  scene.add(enemy);
 }
