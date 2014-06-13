@@ -3,7 +3,6 @@ function setupBall(initialPos, initialVel, material) {
     var ballMaterial = material;
 
     b = new THREE.Mesh(ballGeometry, ballMaterial);
-    b.castShadow = true;
     b.radius = ballRadius;
 
     /* initialise position */
@@ -89,12 +88,4 @@ function outOfBounds(b) {
     var xx = b.position.x;
     var yy = b.position.y;
     return xx*xx + yy*yy > bounds + boundsTolerance;
-}
-
-function noKeyPressed() {
-    return !((Key.isDown(Key.W)) ||
-             (Key.isDown(Key.A)) ||
-             (Key.isDown(Key.S)) ||
-             (Key.isDown(Key.D)) ||
-             Key.isDown(Key.SPACE));
 }

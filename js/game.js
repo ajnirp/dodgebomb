@@ -2,14 +2,12 @@
 /* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
 /* load stats: https://github.com/mrdoob/stats.js/blob/master/examples/basic.html */
-// stats.setMode(1) to show ms by default
 var stats = new Stats();
 document.body.appendChild(stats.domElement);
 
 var renderer, scene, camera;
-// var spotLight, spotLightHeight = 210;
-var spotLight, spotLightHeight = 500;
-var groundRadius = 300;
+var spotLight;
+var groundRadius = 400;
 
 /* camera constants */
 var cameraElevation = 200,
@@ -33,20 +31,20 @@ var enemyCleanupFrequency = 15000; // msec
 var ballAlive = true;
 
 /* periodically spawn enemies */
-// setInterval(function () {
-//     var enemy = spawnEnemy();
-//     enemies.push(enemy);
-//     scene.add(enemy);
-// }, enemySpawnFrequency);
+setInterval(function () {
+    var enemy = spawnEnemy();
+    enemies.push(enemy);
+    scene.add(enemy);
+}, enemySpawnFrequency);
 // /* periodically clean up all stationary enemies */
-// setInterval(function () {
-//     for (var i = enemies.length - 1; i >= 0; i--) {
-//         if (enemies[i].velocity.x === 0 && enemies.velocity.y === 0) {
-//             scene.remove(enemies[i]);
-//             enemies.splice(i,1);
-//         }
-//     };
-// }, enemyCleanupFrequency);
+setInterval(function () {
+    for (var i = enemies.length - 1; i >= 0; i--) {
+        if (enemies[i].velocity.x === 0 && enemies.velocity.y === 0) {
+            scene.remove(enemies[i]);
+            enemies.splice(i,1);
+        }
+    };
+}, enemyCleanupFrequency);
 
 /* physics constants */
 var groundFriction = 0.7,
@@ -86,22 +84,25 @@ function setupScene() {
 
   /* central spotlight */
   spotLight = new THREE.SpotLight(0xffffff);
-  spotLight.position.set(0, 0, spotLightHeight);
-  spotLight.intensity = 1;
+  spotLight.position.set(0, 0, 500); /* x, y, spotLightHeight */
+  // spotLight.intensity = 1;
   spotLight.angle = Math.PI / 2;
-  spotLight.castShadow = true;
-  spotLight.shadowCameraVisible = false;
+  // spotLight.castShadow = true;
   // spotLight.shadowDarkness = 0.5;
   scene.add(spotLight);
 
   /* plane */
-  var plane = setupPlane();
+  var planeTexture = new THREE.ImageUtils.loadTexture('img/stone.png');
+  planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
+  planeTexture.repeat.set(10,10);
+  var planeMaterial = new THREE.MeshLambertMaterial({ map: planeTexture, side: THREE.SingleSide });
+  var circleGeometry = new THREE.CircleGeometry(groundRadius, 32);
+  var bufferGeometry = THREE.BufferGeometryUtils.fromGeometry(circleGeometry);
+  var plane = new THREE.Mesh(bufferGeometry, planeMaterial);
   scene.add(plane);
 
-  renderer.shadowMapEnabled = true;
-  renderer.shadowMapSoft = true;
-
-  plane.receiveShadow = true;
+  // renderer.shadowMapEnabled = true;
+  // renderer.shadowMapSoft = true;
 }
 
 function draw(gamepadSnapshot) {
@@ -117,6 +118,15 @@ function draw(gamepadSnapshot) {
   /* Camera moves with the ball (though not at the same pace) */
   camera.position.y = cameraSetBack + 0.5 * ball.position.y;
   camera.rotation.y = - 0.003 * ball.position.x;
+
+  if (gamepadSnapshot.buttons[6].pressed ||
+      gamepadSnapshot.buttons[7].pressed)
+  {
+    ball.velocity.x = 0;
+    ball.velocity.y = 0;
+    ball.acceleration.x = 0;
+    ball.acceleration.y = 0;
+  }
 
   /* Move the ball */
   ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];

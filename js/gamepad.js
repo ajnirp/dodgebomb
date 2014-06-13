@@ -18,28 +18,15 @@
 
  /* Significant changes made by Rohan Prinja (rs.prinja@samsung.com)
   * in order to make the SBrowser game Dodgebomb
+  * including: stripping away all non-Chrome stuff
   */
-
-// var onMobile = navigator.appVersion.indexOf("Mobile") > -1;
-// if (!onMobile) {
-
-// }
  
 var gamepadSupport = {
   prevRawGamepadType: undefined,
   prevTimestamp: undefined,
-  init: function() {
-    var gamepadSupportAvailable = navigator.getGamepads;
-
-    if (!gamepadSupportAvailable) {
-      alert("Gamepads not supported");
-    } else {
-      gamepadSupport.tick();
-    }
-  },
   tick: function() {
-    gamepadSupport.gamepad = navigator.getGamepads()[0]
-    draw(gamepadSupport.gamepad);
+    gamepadSupport.pollGamepads();
+    draw(navigator.getGamepads()[0]);
     window.requestAnimationFrame(gamepadSupport.tick);
   },
   pollGamepads: function() {
