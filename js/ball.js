@@ -78,14 +78,11 @@ function ballPhysics() {
     }
 
     /* out of bounds check */
-    if (outOfBounds(ball)) {
-        youDied();
-    }
-}
+    var xx = ball.position.x;
+    var yy = ball.position.y;
 
-/* check if the ball b is outside the grounds */
-function outOfBounds(b) {
-    var xx = b.position.x;
-    var yy = b.position.y;
-    return xx*xx + yy*yy > bounds + boundsTolerance;
+    if (xx*xx + yy*yy > bounds + boundsTolerance) {
+        youDied();
+        newBall();
+    }
 }

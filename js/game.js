@@ -16,7 +16,8 @@ var cameraElevation = 200,
 var fieldWidth = 400, fieldHeight = 200;
 
 /* enemies! */
-var enemies = [];
+var enemies = {};
+var enemyId = 0;
 
 var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
 
@@ -33,7 +34,8 @@ var ballAlive = true;
 /* periodically spawn enemies */
 setInterval(function () {
     var enemy = spawnEnemy();
-    enemies.push(enemy);
+    enemy.id = enemyId++;
+    enemies[enemyId] = enemy;
     scene.add(enemy);
 }, enemySpawnFrequency);
 // /* periodically clean up all stationary enemies */
@@ -109,6 +111,7 @@ function draw(gamepadSnapshot) {
   renderer.render(scene, camera);
   ballPhysics();
   enemyPhysics();
+  // drawShadows();
  
   /* spotlight position is fixed
    * but its focus is towards the ball, always */
