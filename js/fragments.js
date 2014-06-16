@@ -7,17 +7,28 @@ function spawnFragments(spawnPos) {
   var multiplier = 2 * Math.PI / numExplosionFragments;
   for (var i = 0 ; i < numExplosionFragments ; i++) {
     var angle = multiplier * i;
-    var fragmentVel = { x: 5 * Math.cos(angle),
-                        y: 5 * Math.sin(angle),
+    var velX = 10 * Math.cos(angle);
+    var velY = 10 * Math.sin(angle);
+    var fragmentVel = { x: Math.random() * 5,
+                        y: Math.random() * 5,
                         z: 5 };
-    // var fragmentVel = { x: 2, y: 3, z: 0 };
     var explosionFragment = setupBall(spawnPos,
                                       fragmentVel,
                                       fragmentMaterial,
-                                      3);
-    explosionFragment.state = ballStateEnum.NORMAL;
+                                      fragmentRadius,
+                                      fragmentGeometry);
     explosionFragments.push(explosionFragment);
+    explosionFragment.acceleration = { x: 0, y: 0, z: 0 };
+    explosionFragment.state = ballStateEnum.NORMAL;
     scene.add(explosionFragment);
+
+    // console.log("111");
+    // console.log("position " + explosionFragment.position.x);
+    // console.log("velocity " + explosionFragment.velocity.x);
+    // console.log("acceleration " + explosionFragment.acceleration.x);
+    // console.log("maxVelocity " + explosionFragment.maxVelocity);
+    // console.log("maxAcceleration " + explosionFragment.maxAcceleration);
+    // console.log("222");
   }
   /* set a timeout to clear the fragments after a while */
   window.setTimeout(clearFragments, fragmentLifetime);

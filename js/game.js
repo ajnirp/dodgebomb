@@ -27,17 +27,10 @@ var score = 0;
 var level = 1;
 var ballAlive = true;
 
-/* periodically spawn enemies */
-// setInterval(spawnEnemy, enemySpawnFrequency);
-/* periodically clean up all stationary enemies */
-// setInterval(function () {
-//     for (var i = enemies.length - 1; i >= 0; i--) {
-//         if (enemies[i].velocity.x === 0 && enemies.velocity.y === 0) {
-//             scene.remove(enemies[i]);
-//             enemies.splice(i,1);
-//         }
-//     };
-// }, enemyCleanupFrequency);
+/* start spawning enemies after an initial wait */
+window.setTimeout(function () {
+  window.setInterval(spawnEnemy, enemySpawnFrequency);
+}, 5000);
 
 /* GL constants */
 var WIDTH = 640, 
@@ -66,17 +59,17 @@ function setupScene() {
   /* marble ball */
   ball = setupBall({ x: 0, y: 0, z: ballRadius },
                    { x: 0, y: 0, z: 0 },
-                   ballRedMaterial);
+                   ballRedMaterial,
+                   ballRadius,
+                   ballGeometry);
   newBall();
   scene.add(ball);
 
   /* central spotlight */
   spotLight = new THREE.SpotLight(0xffffff);
-  spotLight.position.set(0, 0, 500); /* x, y, spotLightHeight */
+  spotLight.position.set(0, 0, spotLightHeight); /* x, y, spotLightHeight */
   // spotLight.intensity = 1;
   spotLight.angle = Math.PI / 2;
-  // spotLight.castShadow = true;
-  // spotLight.shadowDarkness = 0.5;
   scene.add(spotLight);
 
   /* plane */
@@ -84,15 +77,10 @@ function setupScene() {
   planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
   planeTexture.repeat.set(10,10);
   var planeMaterial = new THREE.MeshLambertMaterial({ map: planeTexture, side: THREE.SingleSide });
-  var circleGeometry = new THREE.CircleGeometry(groundRadius, 32);
+  var circleGeometry = new THREE.CircleGeometry(groundRadius, 128);
   var bufferGeometry = THREE.BufferGeometryUtils.fromGeometry(circleGeometry);
   var plane = new THREE.Mesh(bufferGeometry, planeMaterial);
   scene.add(plane);
-
-  // spawnEnemy();
-
-  // renderer.shadowMapEnabled = true;
-  // renderer.shadowMapSoft = true;
 }
 
 function draw(gamepadSnapshot) {
@@ -115,8 +103,8 @@ function draw(gamepadSnapshot) {
   spotLight.target.position.y = ball.position.y;
 
   /* Camera moves with the ball (though not at the same pace) */
-  camera.position.y = cameraSetBack + 0.5 * ball.position.y;
-  camera.rotation.y = - 0.003 * ball.position.x;
+  camera.position.y = cameraSetBack + 0.75 * ball.position.y;
+  camera.rotation.y = -0.001 * ball.position.x;
 
   if (gamepadSnapshot.buttons[6].pressed ||
       gamepadSnapshot.buttons[7].pressed)
@@ -134,9 +122,11 @@ function draw(gamepadSnapshot) {
    * y value is negative when the joystick is pushed up, and the game
    * uses the opposite convention */
 
-  if (gamepadSnapshot.buttons[0].pressed) {
+  if (gamepadSnapshot.buttons[0].pressed &&
+      ball.state != ballStateEnum.FALLING_OFF)
+  {
     if (Math.abs(ball.position.z - ballRadius) < jumpTolerance) {
-        ball.velocity.z = 10;
+      ball.velocity.z = 10;
     }
   }
 
@@ -150,7 +140,7 @@ function draw(gamepadSnapshot) {
 
 function youDied(deathCause) {
   if (deathCause === deathCauseEnum.FELL_OFF_EDGE) {
-    fallOffEdgeAnimation();
+    ball.state = ballStateEnum.FALLING_OFF;
     timeAliveInSec = 0;
   }
   else {
@@ -170,36 +160,149 @@ function setupEnemy(speed) {
   var angle = Math.random() * 2 * Math.PI;
 
   /* enemies spawn slightly outside the perimeter of the ground */
-  var spawnX = 1.02 * groundRadius * Math.cos(angle),
-      spawnY = 1.02 * groundRadius * Math.sin(angle);
+  var spawnX = 1.006 * groundRadius * Math.cos(angle),
+      spawnY = 1.006 * groundRadius * Math.sin(angle);
   var spawnPoint = { x: spawnX, y: spawnY, z: ballRadius };
 
   /* set spawn speed
    * as the level increases, the enemies get faster */
   if (typeof(speed) == 'undefined') {
-    speed = 4;
+    speed = 4; /* default enemy speed */
   }
 
   var velX = -spawnX,
       velY = -spawnY,
       velZ = 0;
 
-  var invSqrtXY = Math.pow(velX*velX + velY*velY, 0.5);
-  velX *= speed / invSqrtXY;
-  velY *= speed / invSqrtXY;
+  var sqrtXY = Math.pow(velX*velX + velY*velY, 0.5);
+  velX *= speed / sqrtXY;
+  velY *= speed / sqrtXY;
 
   var spawnVel = { x: velX, y: velY, z: velZ };
 
-  return setupBall(spawnPoint, spawnVel, enemyMaterial);
+  var enemyRadius = Math.floor(
+    Math.random*(1 + enemyRadiusMax - enemyRadiusMin)
+  ) + enemyRadiusMin;
+  return setupBall(spawnPoint,
+                   spawnVel,
+                   enemyMaterial,
+                   enemyRadius,
+                   enemyGeometry[enemyRadius]);
 }
 
 function spawnEnemy() {
-  var enemy = setupEnemy();
+  var enemy = setupEnemy(3);
   enemy.id = enemyId;
   enemies[enemyId++] = enemy;
-  // enemy.position = { x: 50, y: 0, z: ballRadius };
-  // enemy.velocity = { x: 0, y: 0, z: 0 };
-  // enemy.position = { x: 1000, y: 0, z: ballRadius };
-  // console.log(isOffscreen(ball) + "..");
   scene.add(enemy);
+}
+
+/* initialise a ball */
+function setupBall(initialPos, initialVel, material, temp_radius, temp_geometry)
+{
+  var b = new THREE.Mesh(temp_geometry, material);
+  b.radius = temp_radius;
+
+  /* initialise position */
+  if (typeof(initialPos) == 'undefined') {
+    b.position = { x: 0, y: 0, z: b.radius };
+  } else {
+    b.position = initialPos;
+  }
+
+  /* initialise velocity */
+  if (typeof(initialVel) == 'undefined') {
+    b.velocity = { x: 0, y: 0, z: 0 };
+  } else {
+    b.velocity = initialVel;
+  }
+
+  b.acceleration = { x: 0, y: 0, z: 0 };
+  b.state = ballStateEnum.NORMAL;
+
+  b.maxVelocity = 5;
+  b.maxAcceleration = 4;
+
+  return b;
+}
+
+/* place the ball a little above the center of the ground */
+function newBall() {
+  ball.position = { x: 0, y: 0, z: ballRadius + 200 };
+  ball.acceleration = { x: 0, y: 0 };
+  ball.velocity = { x: 0, y: 0, z: 0 };
+  ball.maxAcceleration = 4;
+  ball.maxVelocity = 5;
+  ball.state = ballStateEnum.IN_THE_AIR;
+}
+
+function ballPhysics(b) {
+  if (b.position.z > b.radius) { b.state = ballStateEnum.IN_THE_AIR; }
+
+  var airborne = (b.state == ballStateEnum.IN_THE_AIR) ||
+                 (b.state == ballStateEnum.FALLING_OFF);
+  b.acceleration.z = (airborne ? gravity : 0);
+
+  /* apply friction */
+  var x_acc_direction = THREE.Math.sign(b.acceleration.x);
+  var y_acc_direction = THREE.Math.sign(b.acceleration.y);
+
+  var x_friction = b.velocity.x != 0 ? groundFriction : 0;
+  var y_friction = b.velocity.y != 0 ? groundFriction : 0;
+
+  b.acceleration.x -= x_acc_direction * x_friction;
+  b.acceleration.y -= y_acc_direction * y_friction;
+
+  if (x_acc_direction * b.acceleration.x < 0) { b.acceleration.x = 0; }
+  if (y_acc_direction * b.acceleration.y < 0) { b.acceleration.y = 0; }
+
+  /* new velocities */
+  b.velocity.x += b.acceleration.x * dt;
+  b.velocity.y += b.acceleration.y * dt;
+  b.velocity.z -= b.acceleration.z * dt;
+
+  /* clamp velocities */
+  if (b.velocity.x > b.maxVelocity) { b.velocity.x = b.maxVelocity; }
+  if (b.velocity.x < -b.maxVelocity) { b.velocity.x = -b.maxVelocity; }
+  if (b.velocity.y > b.maxVelocity) { b.velocity.y = b.maxVelocity; }
+  if (b.velocity.y < -b.maxVelocity) { b.velocity.y = -b.maxVelocity; }
+
+  /* new positions */
+  b.position.x += b.velocity.x * dt;
+  b.position.y += b.velocity.y * dt;
+  b.position.z += b.velocity.z * dt;
+
+  /* out of bounds check */
+  var xx = b.position.x;
+  var yy = b.position.y;
+
+  if (xx*xx + yy*yy > bounds/* + boundsTolerance*/) {
+    youDied(deathCauseEnum.FELL_OFF_EDGE);
+  }
+
+  /* This is where the ball physics diverges based on its state.
+   * If the ball is in its falling-off animation, simply let it fall,
+   * and stop it when it gets too low.
+   * On the other hand, if the ball is within bounds, bounce it off
+   * the ground */
+  if (b.state == ballStateEnum.FALLING_OFF) {
+    if (b.position.z < -80) {
+      b.state = ballStateEnum.IN_THE_AIR;
+      newBall();
+    }
+  }
+  else {
+    if (b.position.z < b.radius) {
+      b.position.z = b.radius;
+      if (Math.abs(b.velocity.z) < ballInAirTolerance) {
+        b.state = ballStateEnum.NORMAL;
+        b.acceleration.z = 0;
+        b.velocity.z = 0;
+      }
+      else {
+        b.state = ballStateEnum.IN_THE_AIR;
+        b.velocity.z *= -1 * groundRestitutionCoefficient;
+      }
+    }
+  }
 }

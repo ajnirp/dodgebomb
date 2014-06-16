@@ -44,8 +44,8 @@ function enemyPhysics() {
       }
 
       /* move the enemy */
-      currEnemy.velocity.x += 0.001 * (ball.position.x - currEnemy.position.x);
-      currEnemy.velocity.y += 0.001 * (ball.position.y - currEnemy.position.y);
+      currEnemy.velocity.x += 0.00065 * (ball.position.x - currEnemy.position.x);
+      currEnemy.velocity.y += 0.00065 * (ball.position.y - currEnemy.position.y);
 
       currEnemy.position.x += currEnemy.velocity.x * dt;
       currEnemy.position.y += currEnemy.velocity.y * dt;

@@ -1,18 +1,30 @@
 /* Constants and globals */
 
+/* timestep */
+var dt = 0.5;
+
 /* camera constants */
-var cameraElevation = 200,
+var cameraElevation = 250,
     cameraSetBack = -400;
 
-var ball; // this is not a constant, i should probably remove it :|
-var ballRadius, enemyRadius;
+/* spotlight */
+var spotLightHeight = 600;
 
-ballRadius = enemyRadius = 10;
+var ball; // this is not a constant, i should probably remove it :|
+var ballRadius = 10, enemyRadius = 10, fragmentRadius = 3;
 
 var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
 var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
 var fragmentMaterial = new THREE.MeshPhongMaterial({ color: 'orange' });
 var ballGeometry = new THREE.SphereGeometry(ballRadius, 12, 6);
+var fragmentGeometry = new THREE.SphereGeometry(fragmentRadius, 12, 6);
+
+var enemyRadiusMin = ballRadius - 4;
+var enemyRadiusMax = ballRadius + 4;
+var enemyGeometry = [];
+for (var i = enemyRadiusMin ; i <= enemyRadiusMax ; i++) {
+	enemyGeometry.push(new THREE.SphereGeometry(i, 12, 6));
+}
 
 /* physics constants */
 var groundFriction = 0.7,
@@ -23,7 +35,7 @@ var boundsTolerance = 15000,
     jumpTolerance = 5,
     ballInAirTolerance = 0.5;
 
-var groundRadius = 400;
+var groundRadius = 600;
 
 var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
 
@@ -56,4 +68,4 @@ var numExplosionFragments = 8;
 var explosionFragments = [];
 
 /* lifetime of an explosion fragment in milliseconds */
-var fragmentLifetime = 4000;
+var fragmentLifetime = 7000;
