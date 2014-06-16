@@ -18,6 +18,9 @@ var ballMaxAcceleration = 4;
 
 /* boost mode is available exactly once per life */
 var boostModeOn = false;
+var boostModeAvailable = true;
+/* boost mode dies out within 10 secs */
+var boostModeLifetime = 10000;
 
 var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
 var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
@@ -81,3 +84,7 @@ var explosionFragments = [];
 
 /* lifetime of an explosion fragment in milliseconds */
 var fragmentLifetime = 7000;
+
+/* coins */
+var coinGeometry = new THREE.CylinderGeometry();
+var coinRadius = 5;

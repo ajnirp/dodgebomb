@@ -23,19 +23,20 @@ var ballAlive = true;
 /* start spawning enemies after an initial wait */
 window.setTimeout(function () {
   window.setInterval(spawnEnemy, enemySpawnFrequency);
-  // window.setInterval(function () {
-  //   for (var key in enemies) {
-  //     if (enemies[key].velocity.x == 0 && enemies[key].velocity.y == 0) {
-  //       scene.remove(enemies[key]);
-  //       delete enemies[key];
-  //     }
-  //   }
-  // }, 10000);
 }, 5000);
 
+window.setInterval(function () {
+  for (var key in enemies) {
+    if (enemies[key].velocity.x < 1  && enemies[key].velocity.y < 1) {
+      scene.remove(enemies[key]);
+      delete enemies[key];
+    }
+  }
+}, 10000);
+
 /* GL constants */
-var WIDTH = 640, 
-    HEIGHT = 480;
+var WIDTH = 480, 
+    HEIGHT = 360;
 var VIEW_ANGLE = 50,
     ASPECT = WIDTH / HEIGHT,
     NEAR = 0.1,
@@ -140,11 +141,19 @@ function draw(gamepadSnapshot) {
   }
 
   /* activate boost mode! */
-  if (!boostModeOn && gamepadSnapshot.buttons[3].pressed) {
+  if (!boostModeOn &&
+       boostModeAvailable &&
+       gamepadSnapshot.buttons[3].pressed) {
     boostModeOn = true;
+    boostModeAvailable = false;
     ballMaxVelocity = 10;
-    aliveAnnouncement.innerHTML = "Boost mode activated!";
+    // aliveAnnouncement.innerHTML = "Boost mode activated!";
     ballMaxAcceleration = 10;
+
+    /* boost mode dies out after some time */
+    window.setTimeout(function () {
+      boostModeOn = false;
+    }, boostModeLifetime);
   }
 
   /* reset gamepad axes */
@@ -261,6 +270,7 @@ function newBall() {
   ball.maxVelocity = 5;
   ball.state = ballStateEnum.IN_THE_AIR;
   boostModeOn = false;
+  boostModeAvailable = true;
 }
 
 function ballPhysics(b) {

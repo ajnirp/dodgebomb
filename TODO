@@ -57,3 +57,4 @@ current plan
 	add varying ground height
 	varying enemy size
 	boost mode (once per lifecycle), slow time
+	use JS to set canvas size to correct dimensions rather than hardcoding into css/style.css
