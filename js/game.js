@@ -28,7 +28,7 @@ var level = 1;
 var ballAlive = true;
 
 /* periodically spawn enemies */
-setInterval(spawnEnemy, enemySpawnFrequency);
+// setInterval(spawnEnemy, enemySpawnFrequency);
 /* periodically clean up all stationary enemies */
 // setInterval(function () {
 //     for (var i = enemies.length - 1; i >= 0; i--) {
@@ -131,6 +131,10 @@ function draw(gamepadSnapshot) {
         ball.velocity.z = 10;
     }
   }
+
+  /* reset gamepad axes */
+  gamepadSnapshot.axes[0] = 0;
+  gamepadSnapshot.axes[1] = 0;
 
   /* Update the FPS counter */
   stats.update();

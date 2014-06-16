@@ -47,3 +47,10 @@ as the level increases
 	the spotlight dims
 
 separate physics.js file for ballPhysics() and enemyPhysics() ?
+
+current plan
+	solve movement bug
+	add shadows
+	add scoring
+	add falling off
+	add indicators

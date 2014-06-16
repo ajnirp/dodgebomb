@@ -14,7 +14,7 @@ function setupBall(initialPos, initialVel, material) {
 
   /* initialise velocity */
   if (typeof(initialVel) == 'undefined') {
-    b.velocity = { x: 0, y: 10, z: 0 };
+    b.velocity = { x: 0, y: 0, z: 0 };
   } else {
     b.velocity = initialVel;
   }
@@ -33,72 +33,81 @@ function newBall() {
 }
 
 function ballPhysics() {
+  // console.log(ball.velocity);
   var dt = 0.5;
 
-  if (ball.position.z > ballRadius) { ball.state = ballStateEnum.IN_THE_AIR; }
-
-  /* apply friction */
-  var x_acc_direction = THREE.Math.sign(ball.acceleration.x);
-  var y_acc_direction = THREE.Math.sign(ball.acceleration.y);
-
-  var x_friction = ball.velocity.x != 0 ? groundFriction : 0;
-  var y_friction = ball.velocity.y != 0 ? groundFriction : 0;
-
-  ball.acceleration.x -= x_acc_direction * x_friction;
-  ball.acceleration.y -= y_acc_direction * y_friction;
-  var airborne = (ball.state == ballStateEnum.IN_THE_AIR) ||
-                 (ball.state == ballStateEnum.FALLING_OFF);
-  ball.acceleration.z = (airborne ? gravity : 0);
-
-  if (x_acc_direction * ball.acceleration.x < 0) { ball.acceleration.x = 0; }
-  if (y_acc_direction * ball.acceleration.y < 0) { ball.acceleration.y = 0; }
-
-  /* new velocities */
-  ball.velocity.x += ball.acceleration.x * dt;
-  ball.velocity.y += ball.acceleration.y * dt;
-  ball.velocity.z -= ball.acceleration.z * dt;
-
-  /* clamp velocities */
-  if (ball.velocity.x > ball.maxVelocity) { ball.velocity.x = ball.maxVelocity; }
-  if (ball.velocity.x < -ball.maxVelocity) { ball.velocity.x = -ball.maxVelocity; }
-  if (ball.velocity.y > ball.maxVelocity) { ball.velocity.y = ball.maxVelocity; }
-  if (ball.velocity.y < -ball.maxVelocity) { ball.velocity.y = -ball.maxVelocity; }
-
-  /* new positions */
-  ball.position.x += ball.velocity.x * dt;
-  ball.position.y += ball.velocity.y * dt;
-  ball.position.z += ball.velocity.z * dt;
-
-  if (ball.position.z < ballRadius) {
-    ball.position.z = ballRadius;
-    if (ball.state == ballStateEnum.FALLING_OFF) {
-      if (ball.position.z < -80) {
-        youDied(deathCauseEnum.ENEMY_CONTACT);
-      }
+  if (ball.state == ballStateEnum.FALLING_OFF) {
+    console.log("here");
+    ball.velocity.z -= gravity * dt;
+    ball.position.z += ball.velocity.z * dt;
+    if (ball.position.z < -80) {
+      console.log("in here");
+      ball.state = ballStateEnum.IN_THE_AIR;
+      newBall();
     }
-    else {
+  }
+  else {
+    if (ball.position.z > ballRadius) { ball.state = ballStateEnum.IN_THE_AIR; }
+
+    var airborne = ball.state == ballStateEnum.IN_THE_AIR;
+    ball.acceleration.z = (airborne ? gravity : 0);
+
+    /* apply friction */
+    var x_acc_direction = THREE.Math.sign(ball.acceleration.x);
+    var y_acc_direction = THREE.Math.sign(ball.acceleration.y);
+
+    var x_friction = ball.velocity.x != 0 ? groundFriction : 0;
+    var y_friction = ball.velocity.y != 0 ? groundFriction : 0;
+
+    ball.acceleration.x -= x_acc_direction * x_friction;
+    ball.acceleration.y -= y_acc_direction * y_friction;
+
+    if (x_acc_direction * ball.acceleration.x < 0) { ball.acceleration.x = 0; }
+    if (y_acc_direction * ball.acceleration.y < 0) { ball.acceleration.y = 0; }
+
+    /* new velocities */
+    ball.velocity.x += ball.acceleration.x * dt;
+    ball.velocity.y += ball.acceleration.y * dt;
+    ball.velocity.z -= ball.acceleration.z * dt;
+
+    /* clamp velocities */
+    if (ball.velocity.x > ball.maxVelocity) { ball.velocity.x = ball.maxVelocity; }
+    if (ball.velocity.x < -ball.maxVelocity) { ball.velocity.x = -ball.maxVelocity; }
+    if (ball.velocity.y > ball.maxVelocity) { ball.velocity.y = ball.maxVelocity; }
+    if (ball.velocity.y < -ball.maxVelocity) { ball.velocity.y = -ball.maxVelocity; }
+
+    /* new positions */
+    ball.position.x += ball.velocity.x * dt;
+    ball.position.y += ball.velocity.y * dt;
+    ball.position.z += ball.velocity.z * dt;
+
+    if (ball.position.z < ballRadius) {
+      ball.position.z = ballRadius;
       if (Math.abs(ball.velocity.z) < ballInAirTolerance) {
         ball.state = ballStateEnum.NORMAL;
+        ball.acceleration.z = 0;
+        ball.velocity.z = 0;
       }
       else {
         ball.state = ballStateEnum.IN_THE_AIR;
         ball.velocity.z *= -1 * groundRestitutionCoefficient;
       }
     }
-  }
 
-  /* out of bounds check */
-  var xx = ball.position.x;
-  var yy = ball.position.y;
+    /* out of bounds check */
+    var xx = ball.position.x;
+    var yy = ball.position.y;
 
-  if (xx*xx + yy*yy > bounds + boundsTolerance &&
-      ball.state != ballStateEnum.FALLING_OFF)
-  {
-    youDied(deathCauseEnum.FELL_OFF_EDGE);
-    newBall();
+    if (xx*xx + yy*yy > bounds + boundsTolerance)
+    {
+      youDied(deathCauseEnum.FELL_OFF_EDGE);
+      // youDied(deathCauseEnum.ENEMY_CONTACT);
+      // newBall();
+    }
   }
 }
 
 function fallOffEdgeAnimation() {
+  // console.log("falling off edge animation");
   ball.state = ballStateEnum.FALLING_OFF;
 }
