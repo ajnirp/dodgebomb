@@ -28,7 +28,7 @@ var level = 1;
 var ballAlive = true;
 
 /* periodically spawn enemies */
-setInterval(spawnEnemy, enemySpawnFrequency);
+// setInterval(spawnEnemy, enemySpawnFrequency);
 /* periodically clean up all stationary enemies */
 // setInterval(function () {
 //     for (var i = enemies.length - 1; i >= 0; i--) {
@@ -97,8 +97,16 @@ function setupScene() {
 
 function draw(gamepadSnapshot) {
   renderer.render(scene, camera);
-  ballPhysics();
+  ballPhysics(ball);
   enemyPhysics();
+
+  /* phatak boom */
+  if (explosionFragments.length > 0) {
+    for (var i = 0 ; i < explosionFragments.length ; i++) {
+      ballPhysics(explosionFragments[i]);
+    }
+  }
+
   // drawShadows();
  
   /* spotlight position is fixed
@@ -143,10 +151,18 @@ function draw(gamepadSnapshot) {
 function youDied(deathCause) {
   if (deathCause === deathCauseEnum.FELL_OFF_EDGE) {
     fallOffEdgeAnimation();
+    timeAliveInSec = 0;
   }
   else {
-    timeAliveInSec = 0;
+    // spawnFragments({
+    //   x: ball.position.x,
+    //   y: ball.position.y,
+    //   z: ball.position.z
+    // });
+
+    /* and finally, kill off the current ball and get a new one */
     newBall();
+    timeAliveInSec = 0;
   }
 }
 
@@ -179,8 +195,8 @@ function setupEnemy(speed) {
 
 function spawnEnemy() {
   var enemy = setupEnemy();
-  enemy.id = enemyId++;
-  enemies[enemyId] = enemy;
+  enemy.id = enemyId;
+  enemies[enemyId++] = enemy;
   // enemy.position = { x: 50, y: 0, z: ballRadius };
   // enemy.velocity = { x: 0, y: 0, z: 0 };
   // enemy.position = { x: 1000, y: 0, z: ballRadius };

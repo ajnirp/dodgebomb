@@ -1,3 +1,5 @@
+/* Constants and globals */
+
 /* camera constants */
 var cameraElevation = 200,
     cameraSetBack = -400;
@@ -7,8 +9,9 @@ var ballRadius, enemyRadius;
 
 ballRadius = enemyRadius = 10;
 
-var enemyMaterial = new THREE.MeshPhongMaterial({  color: 'grey' /*, transparent: true, opacity: 0.8*/ });
-var ballRedMaterial = new THREE.MeshPhongMaterial({  color: 'red' /*, transparent: true, opacity: 0.8*/ });
+var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
+var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
+var fragmentMaterial = new THREE.MeshPhongMaterial({ color: 'orange' });
 var ballGeometry = new THREE.SphereGeometry(ballRadius, 12, 6);
 
 /* physics constants */
@@ -41,3 +44,16 @@ var enemySpawnFrequency = 3000; // msec
 var enemyCleanupFrequency = 15000; // msec
 
 var raycaster = new THREE.Raycaster();
+
+/* number of explosion fragments generated when an enemy hits our hero.
+ * note that while explosion fragments persist in the scene, another explosion
+ * can simultaneously happen. So numExplosionFragments is not necessarily ===
+ * explosionFragments.length, in fact it is a factor of it!
+ */
+var numExplosionFragments = 8;
+
+/* explosion fragments */
+var explosionFragments = [];
+
+/* lifetime of an explosion fragment in milliseconds */
+var fragmentLifetime = 4000;
