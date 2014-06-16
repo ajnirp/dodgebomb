@@ -13,11 +13,24 @@ var spotLightHeight = 600;
 var ball; // this is not a constant, i should probably remove it :|
 var ballRadius = 10, enemyRadius = 10, fragmentRadius = 3;
 
+var ballMaxVelocity = 5;
+var ballMaxAcceleration = 4;
+
+/* boost mode is available exactly once per life */
+var boostModeOn = false;
+
 var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
 var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
 var fragmentMaterial = new THREE.MeshPhongMaterial({ color: 'orange' });
 var ballGeometry = new THREE.SphereGeometry(ballRadius, 12, 6);
 var fragmentGeometry = new THREE.SphereGeometry(fragmentRadius, 12, 6);
+
+// JSON object storing the enemies
+var enemies = {};
+// each enemy gets a unique ID
+var enemyId = 0;
+// each enemy gets a green arrow indicating where they are
+var indicators = {};
 
 var enemyRadiusMin = ballRadius - 4;
 var enemyRadiusMax = ballRadius + 4;
@@ -53,7 +66,6 @@ var ballStateEnum = {
 }
 
 var enemySpawnFrequency = 3000; // msec
-var enemyCleanupFrequency = 15000; // msec
 
 var raycaster = new THREE.Raycaster();
 

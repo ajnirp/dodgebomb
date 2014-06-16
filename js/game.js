@@ -12,13 +12,6 @@ var spotLight;
 
 /* enemies! */
 
-// JSON object storing the enemies
-var enemies = {};
-// each enemy gets a unique ID
-var enemyId = 0;
-// each enemy gets a green arrow indicating where they are
-var indicators = {};
-
 /* ambient light, needed for the super creepy flicker effect */
 // var ambientLight = new THREE.AmbientLight(0x101010);
 
@@ -30,6 +23,14 @@ var ballAlive = true;
 /* start spawning enemies after an initial wait */
 window.setTimeout(function () {
   window.setInterval(spawnEnemy, enemySpawnFrequency);
+  // window.setInterval(function () {
+  //   for (var key in enemies) {
+  //     if (enemies[key].velocity.x == 0 && enemies[key].velocity.y == 0) {
+  //       scene.remove(enemies[key]);
+  //       delete enemies[key];
+  //     }
+  //   }
+  // }, 10000);
 }, 5000);
 
 /* GL constants */
@@ -67,10 +68,17 @@ function setupScene() {
 
   /* central spotlight */
   spotLight = new THREE.SpotLight(0xffffff);
-  spotLight.position.set(0, 0, spotLightHeight); /* x, y, spotLightHeight */
+  spotLight.position.set(0, 0, spotLightHeight);
   // spotLight.intensity = 1;
   spotLight.angle = Math.PI / 2;
   scene.add(spotLight);
+
+  /* spotlight lamp */
+  var lampGeometry = new THREE.CylinderGeometry(5,40,20,16);
+  var lampMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+  var lamp = new THREE.Mesh(lampGeometry, lampMaterial);
+  lamp.position.set(0, 0, spotLightHeight);
+  scene.add(lamp);
 
   /* plane */
   var planeTexture = new THREE.ImageUtils.loadTexture('img/stone.png');
@@ -122,12 +130,21 @@ function draw(gamepadSnapshot) {
    * y value is negative when the joystick is pushed up, and the game
    * uses the opposite convention */
 
+  /* jump */
   if (gamepadSnapshot.buttons[0].pressed &&
       ball.state != ballStateEnum.FALLING_OFF)
   {
     if (Math.abs(ball.position.z - ballRadius) < jumpTolerance) {
       ball.velocity.z = 10;
     }
+  }
+
+  /* activate boost mode! */
+  if (!boostModeOn && gamepadSnapshot.buttons[3].pressed) {
+    boostModeOn = true;
+    ballMaxVelocity = 10;
+    aliveAnnouncement.innerHTML = "Boost mode activated!";
+    ballMaxAcceleration = 10;
   }
 
   /* reset gamepad axes */
@@ -180,21 +197,30 @@ function setupEnemy(speed) {
 
   var spawnVel = { x: velX, y: velY, z: velZ };
 
-  var enemyRadius = Math.floor(
-    Math.random*(1 + enemyRadiusMax - enemyRadiusMin)
-  ) + enemyRadiusMin;
   return setupBall(spawnPoint,
                    spawnVel,
                    enemyMaterial,
-                   enemyRadius,
-                   enemyGeometry[enemyRadius]);
+                   ballRadius,
+                   ballGeometry
+                   );
 }
 
 function spawnEnemy() {
   var enemy = setupEnemy(3);
   enemy.id = enemyId;
+  var idAdded = enemyId;
   enemies[enemyId++] = enemy;
   scene.add(enemy);
+  window.setTimeout(function () {
+    /* stop enemy */
+    enemies[idAdded].velocity = { x: 0, y: 0, z: 0 };
+    /* ...then remove it from the scene after a while */
+    // window.setTimeout(function () {
+    //   scene.remove(enemies[idAdded]);
+    //   delete enemies[idAdded];
+    // }, 3000);
+  }, enemySpawnFrequency);
+  enemyId++;
 }
 
 /* initialise a ball */
@@ -220,8 +246,8 @@ function setupBall(initialPos, initialVel, material, temp_radius, temp_geometry)
   b.acceleration = { x: 0, y: 0, z: 0 };
   b.state = ballStateEnum.NORMAL;
 
-  b.maxVelocity = 5;
-  b.maxAcceleration = 4;
+  b.maxVelocity = ballMaxVelocity;
+  b.maxAcceleration = ballMaxAcceleration;
 
   return b;
 }
@@ -234,6 +260,7 @@ function newBall() {
   ball.maxAcceleration = 4;
   ball.maxVelocity = 5;
   ball.state = ballStateEnum.IN_THE_AIR;
+  boostModeOn = false;
 }
 
 function ballPhysics(b) {
@@ -267,10 +294,12 @@ function ballPhysics(b) {
   if (b.velocity.y > b.maxVelocity) { b.velocity.y = b.maxVelocity; }
   if (b.velocity.y < -b.maxVelocity) { b.velocity.y = -b.maxVelocity; }
 
+  var displacementMultiplier = (boostModeOn ? 2 : 1);
+
   /* new positions */
-  b.position.x += b.velocity.x * dt;
-  b.position.y += b.velocity.y * dt;
-  b.position.z += b.velocity.z * dt;
+  b.position.x += displacementMultiplier * b.velocity.x * dt;
+  b.position.y += displacementMultiplier * b.velocity.y * dt;
+  b.position.z += displacementMultiplier * b.velocity.z * dt;
 
   /* out of bounds check */
   var xx = b.position.x;

@@ -1,1 +1,0 @@
-var onMobile = navigator.appVersion.indexOf("Mobile") > -1;

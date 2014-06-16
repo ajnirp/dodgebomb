@@ -3,11 +3,6 @@ function isOffscreen(enemy) {
   var direction = new THREE.Vector3(enemy.position.x - camera.position.x, enemy.position.y - camera.position.y, enemy.position.z - camera.position.z);
   raycaster.set(origin, direction.normalize());
   var intersections = raycaster.intersectObject(enemy);
-
-  // console.log(origin.x + " " + origin.y + " " + origin.z);
-  // console.log(direction.x + " " + direction.y + " " + direction.z);
-  // console.log(enemy.position);
-
   return (intersections.length == 0);
 }
 

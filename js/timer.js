@@ -11,5 +11,8 @@ function setTime() {
 	}
 }
 
-function levelUp() {
-}
+/* level up after 50 seconds */
+// setInterval(levelUp, 50000);
+
+// function levelUp() {
+// }
