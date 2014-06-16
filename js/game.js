@@ -28,7 +28,7 @@ var level = 1;
 var ballAlive = true;
 
 /* periodically spawn enemies */
-// setInterval(spawnEnemy, enemySpawnFrequency);
+setInterval(spawnEnemy, enemySpawnFrequency);
 /* periodically clean up all stationary enemies */
 // setInterval(function () {
 //     for (var i = enemies.length - 1; i >= 0; i--) {
