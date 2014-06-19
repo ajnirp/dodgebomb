@@ -1,11 +1,3 @@
-function isOffscreen(enemy) {
-  var origin = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
-  var direction = new THREE.Vector3(enemy.position.x - camera.position.x, enemy.position.y - camera.position.y, enemy.position.z - camera.position.z);
-  raycaster.set(origin, direction.normalize());
-  var intersections = raycaster.intersectObject(enemy);
-  return (intersections.length == 0);
-}
-
 // function spawnIndicator(enemy) {
 //   var geometry = new THREE.Geometry();
 //   var v1 = new THREE.Vector3();
@@ -17,34 +9,30 @@ function isOffscreen(enemy) {
 //   var indicator = 
 // }
 
-function enemyPhysics() {
+function enemyPhysics(key) {
   var dt = 0.5;
+  var currEnemy = enemies[key];
 
-  for (var key in enemies) {
-    var currEnemy = enemies[key];
+  var xx = currEnemy.position.x;
+  var yy = currEnemy.position.y;
 
-    var xx = currEnemy.position.x;
-    var yy = currEnemy.position.y;
-
-    if ((xx*xx + yy*yy > bounds + boundsTolerance) ||
-      (currEnemy.velocity.x == 0 && currEnemy.velocity.y == 0)) {
-      scene.remove(currEnemy);
-      delete enemies[key];
-      delete indicators[key];
+  if ((xx*xx + yy*yy > bounds + boundsTolerance)) {
+    scene.remove(currEnemy);
+    delete enemies[key];
+    // delete indicators[key];
+  }
+  else {
+    /* check for a collision */
+    if (collisionBetween(currEnemy, ball)) {
+      youDied(deathCauseEnum.ENEMY_CONTACT);
     }
-    else {
-      /* check for a collision */
-      if (collisionBetween(currEnemy, ball)) {
-        youDied(deathCauseEnum.ENEMY_CONTACT);
-      }
 
-      /* move the enemy */
-      currEnemy.velocity.x += 0.00065 * (ball.position.x - currEnemy.position.x);
-      currEnemy.velocity.y += 0.00065 * (ball.position.y - currEnemy.position.y);
+    /* move the enemy */
+    currEnemy.velocity.x += 0.00065 * (ball.position.x - currEnemy.position.x);
+    currEnemy.velocity.y += 0.00065 * (ball.position.y - currEnemy.position.y);
 
-      currEnemy.position.x += currEnemy.velocity.x * dt;
-      currEnemy.position.y += currEnemy.velocity.y * dt;
-    }
+    currEnemy.position.x += currEnemy.velocity.x * dt;
+    currEnemy.position.y += currEnemy.velocity.y * dt;
   }
 }
 

@@ -1,4 +1,16 @@
-/* Constants and globals */
+/****************************************
+ *
+ * Constants and globals
+ *
+ ****************************************/
+
+/* GL constants */
+var WIDTH = 800, 
+    HEIGHT = 480;
+var VIEW_ANGLE = 50,
+    ASPECT = WIDTH / HEIGHT,
+    NEAR = 0.1,
+    FAR = 10000;
 
 /* timestep */
 var dt = 0.5;
@@ -68,13 +80,13 @@ var ballStateEnum = {
 	NORMAL: 3
 }
 
-var enemySpawnFrequency = 3000; // msec
+var enemySpawnFrequency = 2000; // msec
 
 var raycaster = new THREE.Raycaster();
 
 /* number of explosion fragments generated when an enemy hits our hero.
  * note that while explosion fragments persist in the scene, another explosion
- * can simultaneously happen. So numExplosionFragments is not necessarily ===
+ * can simultaneously happen. So numExplosionFragments is not necessarily ==
  * explosionFragments.length, in fact it is a factor of it!
  */
 var numExplosionFragments = 8;
@@ -86,5 +98,48 @@ var explosionFragments = [];
 var fragmentLifetime = 7000;
 
 /* coins */
-var coinGeometry = new THREE.CylinderGeometry();
-var coinRadius = 5;
+var coins = {}; /* global object to store coins */
+var coinId = 0; /* id for each coin */
+// 0xF7DE3A
+var coinColor = 0xffff00;
+// var coinEmissiveColor = 0xCFCE74;
+var coinRadius = 12;
+var coinThickness = 3;
+var coinGeometry = new THREE.CylinderGeometry(coinRadius,
+                                              coinRadius,
+                                              coinThickness,
+                                              16);
+var coinMaterial = new THREE.MeshPhongMaterial({
+  color: coinColor,
+  specular: coinColor,
+  ambient: 0xABA615,
+  shininess: 20
+});
+var coinSpawnFrequency = 5000;
+var coinLifetime = 8000; /* coins live for coinLifetime sec */
+var scoreDisplaySpan = document.getElementById("scoreDisplay");
+var coinsCollected = 0;
+var coinPickupTolerance = 25;
+
+/* controls and options */
+var gameOptions = {
+  paused: false,
+  displayScore: true,
+  mute: false
+}
+
+/* sounds */
+var sounds = {
+
+  explosion: new Howl({
+    urls: ['assets/explosion.wav']
+  }),
+
+  coinPickup: new Howl({
+    urls: ['assets/coin.wav'],
+    onplay: function () { sounds.blockCoinPickup = true; }
+  }),
+
+  blockCoinPickup: false
+
+}

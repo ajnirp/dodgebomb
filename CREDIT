@@ -1,0 +1,19 @@
+About
+-----
+
+A partial listing of credits for this project. The format is:
+[Item]: [Person/Code to credit], [description], ([URL, if any])
+
+A lot of the art was taken from the excellent opengameart.org.
+
+Art
+---
+
+Medieval floor: [unspecified], hosted on opengameart.org (http://opengameart.org/content/medieval-floor)
+
+Sounds
+------
+
+Explosion sound: Michel Baradari, hosted on opengameart.org (http://opengameart.org/content/2-high-quality-explosions)
+Coin pickup sound: rustltd.com, hosted on opengameart.org ()
+Sound library: howler.js, modern JS audio library (http://goldfirestudios.com/blog/104/howler.js-Modern-Web-Audio-Javascript-Library)

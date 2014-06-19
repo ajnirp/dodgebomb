@@ -5,10 +5,8 @@
 var stats = new Stats();
 document.body.appendChild(stats.domElement);
 
-var renderer;
-var camera;
-var scene;
-var spotLight;
+var renderer, camera, scene, spotLight;
+// var composer;
 
 /* enemies! */
 
@@ -16,34 +14,34 @@ var spotLight;
 // var ambientLight = new THREE.AmbientLight(0x101010);
 
 /* game stuff */
-var score = 0;
 var level = 1;
-var ballAlive = true;
 
-/* start spawning enemies after an initial wait */
+/* start periodically spawning enemies after an initial wait */
 window.setTimeout(function () {
   window.setInterval(spawnEnemy, enemySpawnFrequency);
+}, 3000);
+
+/* start periodically spawning coins after an initial wait */
+window.setTimeout(function () {
+  window.setInterval(spawnCoin, coinSpawnFrequency);
 }, 5000);
 
-window.setInterval(function () {
-  for (var key in enemies) {
-    if (enemies[key].velocity.x < 1  && enemies[key].velocity.y < 1) {
-      scene.remove(enemies[key]);
-      delete enemies[key];
-    }
-  }
-}, 10000);
+/* debugging stuff - periodic logs */
+// window.setInterval(function () {
+//   console.log("e " + Object.keys(enemies).length);
+//   console.log("c " + Object.keys(coins).length);
+// }, 5000);
 
-/* GL constants */
-var WIDTH = 480, 
-    HEIGHT = 360;
-var VIEW_ANGLE = 50,
-    ASPECT = WIDTH / HEIGHT,
-    NEAR = 0.1,
-    FAR = 10000;
+function isOffScreen(b) {
+  var origin = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
+  var direction = new THREE.Vector3(b.position.x - camera.position.x, b.position.y - camera.position.y, b.position.z - camera.position.z);
+  raycaster.set(origin, direction.normalize());
+  var intersections = raycaster.intersectObject(b);
+  return (intersections.length == 0);
+}
 
 function setupScene() {
-    /* set up renderer */
+  /* set up renderer */
 	renderer = new THREE.WebGLRenderer();
   renderer.setSize(WIDTH, HEIGHT);
 
@@ -90,12 +88,36 @@ function setupScene() {
   var bufferGeometry = THREE.BufferGeometryUtils.fromGeometry(circleGeometry);
   var plane = new THREE.Mesh(bufferGeometry, planeMaterial);
   scene.add(plane);
+
+  /* temp shadow */
+  var shadow = new THREE.EllipseCurve();
+
+  /* setup composer */
+  // composer = new THREE.EffectComposer(renderer);
+  // composer.addPass(new THREE.RenderPass(scene, camera));
+  // renderer.renderToScreen = true;
 }
 
 function draw(gamepadSnapshot) {
+  /* draw the game elements */
   renderer.render(scene, camera);
+  // composer.render(scene, camera);
+
+  /* ball physics */
   ballPhysics(ball);
-  enemyPhysics();
+
+  /* physics for each enemy */
+  for (var key in enemies) {
+    var currEnemy = enemies[key];
+    if (!currEnemy.stoppedMoving) {
+      enemyPhysics(key);
+    }
+  }
+
+  /* physics for each coin */
+  for (var key in coins) {
+    coinPhysics(key); 
+  }
 
   /* phatak boom */
   if (explosionFragments.length > 0) {
@@ -162,6 +184,10 @@ function draw(gamepadSnapshot) {
 
   /* Update the FPS counter */
   stats.update();
+
+  if (gamepadSnapshot.buttons[1].pressed) {
+    console.log(isOffScreen(ball));
+  }
 }
 
 function youDied(deathCause) {
@@ -218,18 +244,16 @@ function spawnEnemy() {
   var enemy = setupEnemy(3);
   enemy.id = enemyId;
   var idAdded = enemyId;
+  enemy.stoppedMoving = false;
   enemies[enemyId++] = enemy;
   scene.add(enemy);
-  window.setTimeout(function () {
-    /* stop enemy */
-    enemies[idAdded].velocity = { x: 0, y: 0, z: 0 };
-    /* ...then remove it from the scene after a while */
-    // window.setTimeout(function () {
-    //   scene.remove(enemies[idAdded]);
-    //   delete enemies[idAdded];
-    // }, 3000);
+  setTimeout(function () {
+    enemies[idAdded].stoppedMoving = true;
+    setTimeout(function () {
+      scene.remove(enemies[idAdded]);
+      delete enemies[idAdded];
+    }, 1000);
   }, enemySpawnFrequency);
-  enemyId++;
 }
 
 /* initialise a ball */
@@ -261,8 +285,8 @@ function setupBall(initialPos, initialVel, material, temp_radius, temp_geometry)
   return b;
 }
 
-/* place the ball a little above the center of the ground */
 function newBall() {
+  /* place the ball a little above the center of the ground */
   ball.position = { x: 0, y: 0, z: ballRadius + 200 };
   ball.acceleration = { x: 0, y: 0 };
   ball.velocity = { x: 0, y: 0, z: 0 };
@@ -271,6 +295,10 @@ function newBall() {
   ball.state = ballStateEnum.IN_THE_AIR;
   boostModeOn = false;
   boostModeAvailable = true;
+
+  /* reset score by resetting coinsCollected */
+  coinsCollected = 0;
+  scoreDisplaySpan.innerHTML = 0;
 }
 
 function ballPhysics(b) {
@@ -304,7 +332,7 @@ function ballPhysics(b) {
   if (b.velocity.y > b.maxVelocity) { b.velocity.y = b.maxVelocity; }
   if (b.velocity.y < -b.maxVelocity) { b.velocity.y = -b.maxVelocity; }
 
-  var displacementMultiplier = (boostModeOn ? 2 : 1);
+  var displacementMultiplier = (boostModeOn && b == ball ? 2 : 1);
 
   /* new positions */
   b.position.x += displacementMultiplier * b.velocity.x * dt;
@@ -344,4 +372,36 @@ function ballPhysics(b) {
       }
     }
   }
+}
+
+function coinPhysics(key) {
+  var coin = coins[key];
+  /* rotate the coin */
+  coin.rotation.z += 0.1;
+
+  /* check for a coin pickup */
+  var xx = ball.position.x - coin.position.x;
+  var yy = ball.position.y - coin.position.y;
+  var min_dist = ballRadius + coinThickness + coinPickupTolerance;
+  
+  if (xx*xx + yy*yy < min_dist*min_dist && !coin.pickedUp) {
+    coin.pickedUp = true;
+    coinCollected(coin);
+  }
+}
+
+function coinCollected(coin) {
+  console.log("called coin collected");
+  /* clear the removal timeout for the coin */
+  window.clearTimeout(coin.timeout);
+
+  /* remove the coin from the game */
+  scene.remove(coin)
+  delete coin;
+
+  /* play the coin pickup sound */
+  sounds.coinPickup.play();
+  
+  /* update the number of coins collected and display the new score */
+  scoreDisplaySpan.innerHTML = 100 * (++coinsCollected);
 }

@@ -53,8 +53,19 @@ current plan
 	add scoring
 	add falling off
 	add indicators
-	add coins
 	add varying ground height
 	varying enemy size
 	boost mode (once per lifecycle), slow time
 	use JS to set canvas size to correct dimensions rather than hardcoding into css/style.css
+
+
+todo
+	coin pick up - rise and fade
+	coin colors need to be better
+	play sound
+		coin pick up
+		death
+			fall off
+			enemy contact
+	mute button
+	show/hide score by pressing button

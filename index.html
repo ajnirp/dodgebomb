@@ -8,13 +8,29 @@
     <link href="css/style.css" rel="stylesheet">
   </head>
   <body>
-    <h1 id="mainheader">You have been alive for <span id="timeAlive">0</span> seconds!</h1>
+    <div id="infoDisplay">
+      <div id="timeDisplay">
+        Time <span id="timeAlive">0</span>
+      </div>
+
+      <div id="coinDisplay">
+        Score <span id="scoreDisplay">0</span>
+      </div>
+
+      <div id="boostModeDisplay">
+      </div>
+    </div>
     <div id="gameCanvas"></div>
-    <script src="http://jsconsole.com/remote.js?93DA822F-7FE5-450F-A30C-369711C6E93A"></script>
+    <!-- script src="http://jsconsole.com/remote.js?4231D40D-D459-4A7D-BD73-C353313BE7B4"></script -->
+
+    <script src="js/stats.min.js"></script>
     <script src="js/three.min.js"></script>
     <script src="js/BufferGeometryUtils.js"></script>
-    <script src="js/constants.js"></script>
-    <script src="js/stats.min.js"></script>
+    <script src="js/howler.min.js"></script>
+
+    <script src="js/globals.js"></script>
+
+    <script src="js/coins.js"></script>
     <script src="js/gamepad.js"></script>
     <!-- script src="js/spotlight.js"></script -->
     <script src="js/camera.js"></script>
@@ -22,7 +38,8 @@
     <script src="js/game.js"></script>
     <script src="js/ball.js"></script>
     <script src="js/enemies.js"></script>
-    <!-- script src="js/timer.js"></script -->
+    <script src="js/coins.js"></script>
+    <script src="js/timer.js"></script>
 
     <script>
       setupScene();

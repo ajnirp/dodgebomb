@@ -5,10 +5,8 @@ var timeAliveSpan = document.getElementById("timeAlive");
 setInterval(setTime, 1000);
 
 function setTime() {
-	if (ballAlive) {
-		timeAliveSpan.innerHTML = timeAliveInSec + "";
-		timeAliveInSec++;
-	}
+  timeAliveSpan.innerHTML = timeAliveInSec + "";
+  timeAliveInSec++;
 }
 
 /* level up after 50 seconds */
