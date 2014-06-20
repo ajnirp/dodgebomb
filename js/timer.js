@@ -10,8 +10,8 @@ function setTime() {
 }
 
 function boostCountdown () {
-  boostModeTimeLeft -= 1000;
   boostModeDisplay.innerHTML = "Boost mode: " + (boostModeTimeLeft / 1000);
+  boostModeTimeLeft -= 1000;
 }
 
 /* level up after 50 seconds */

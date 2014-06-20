@@ -31,9 +31,12 @@ var ballMaxAcceleration = 4;
 
 var boostModeOn = false;
 var boostModeAvailable = true; /* boost mode is available exactly once per life */
-var boostModeDuration = 8000; /* boost mode dies out within 10 secs */
+var boostModeDuration = 10000; /* boost mode dies out within 10 secs */
 var boostModeTimeLeft = boostModeDuration;
 var boostCountdownId;
+/* Trail of "previous-positions" of the ball that will be displayed when
+ * boostMode is on */
+var boostTrail = [];
 
 var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
 var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
@@ -54,7 +57,7 @@ for (var i = enemyRadiusMin ; i <= enemyRadiusMax ; i++) {
 }
 
 /* physics constants */
-var groundFriction = 0.7,
+var groundFriction = 1.5,
     gravity = 1.5,
     groundRestitutionCoefficient = 0.5;
 
@@ -120,13 +123,13 @@ var coinsCollected = 0;
 var coinPickupTolerance = 25;
 
 /* controls and options */
-// var gameOptions = {
+var gameOptions = {
 
-//   paused: false,
-//   displayScore: true,
-//   mute: false
+  paused: false,
+  displayScore: true,
+  mute: false
 
-// }
+}
 
 /* sounds */
 var sounds = {

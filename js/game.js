@@ -91,11 +91,6 @@ function setupScene() {
 
   /* temp shadow */
   var shadow = new THREE.EllipseCurve();
-
-  /* setup composer */
-  // composer = new THREE.EffectComposer(renderer);
-  // composer.addPass(new THREE.RenderPass(scene, camera));
-  // renderer.renderToScreen = true;
 }
 
 function draw(gamepadSnapshot) {
@@ -140,10 +135,13 @@ function draw(gamepadSnapshot) {
   if (gamepadSnapshot.buttons[6].pressed ||
       gamepadSnapshot.buttons[7].pressed)
   {
-    ball.velocity.x = 0;
-    ball.velocity.y = 0;
-    ball.acceleration.x = 0;
-    ball.acceleration.y = 0;
+    // ball.velocity.x = 0;
+    // ball.velocity.y = 0;
+    // ball.acceleration.x = 0;
+    // ball.acceleration.y = 0;
+    ball.maxVelocity = 2;
+  } else {
+    ball.maxVelocity = 5;
   }
 
   /* Move the ball */
@@ -192,10 +190,6 @@ function draw(gamepadSnapshot) {
 
   /* Update the FPS counter */
   stats.update();
-
-  if (gamepadSnapshot.buttons[1].pressed) {
-    console.log(isOffScreen(ball));
-  }
 }
 
 function youDied(deathCause) {
@@ -330,17 +324,17 @@ function ballPhysics(b) {
   b.acceleration.z = (airborne ? gravity : 0);
 
   /* apply friction */
-  var x_acc_direction = THREE.Math.sign(b.acceleration.x);
-  var y_acc_direction = THREE.Math.sign(b.acceleration.y);
+  // var x_acc_direction = THREE.Math.sign(b.acceleration.x);
+  // var y_acc_direction = THREE.Math.sign(b.acceleration.y);
 
-  var x_friction = b.velocity.x != 0 ? groundFriction : 0;
-  var y_friction = b.velocity.y != 0 ? groundFriction : 0;
+  // var x_friction = b.velocity.x != 0 ? groundFriction : 0;
+  // var y_friction = b.velocity.y != 0 ? groundFriction : 0;
 
-  b.acceleration.x -= x_acc_direction * x_friction;
-  b.acceleration.y -= y_acc_direction * y_friction;
+  // b.acceleration.x -= x_acc_direction * x_friction;
+  // b.acceleration.y -= y_acc_direction * y_friction;
 
-  if (x_acc_direction * b.acceleration.x < 0) { b.acceleration.x = 0; }
-  if (y_acc_direction * b.acceleration.y < 0) { b.acceleration.y = 0; }
+  // if (x_acc_direction * b.acceleration.x < 0) { b.acceleration.x = 0; }
+  // if (y_acc_direction * b.acceleration.y < 0) { b.acceleration.y = 0; }
 
   /* new velocities */
   b.velocity.x += b.acceleration.x * dt;
