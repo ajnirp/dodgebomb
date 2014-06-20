@@ -34,7 +34,9 @@ window.setTimeout(function () {
 
 function isOffScreen(b) {
   var origin = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
-  var direction = new THREE.Vector3(b.position.x - camera.position.x, b.position.y - camera.position.y, b.position.z - camera.position.z);
+  var direction = new THREE.Vector3(b.position.x - camera.position.x,
+                                    b.position.y - camera.position.y,
+                                    b.position.z - camera.position.z);
   raycaster.set(origin, direction.normalize());
   var intersections = raycaster.intersectObject(b);
   return (intersections.length == 0);
@@ -98,6 +100,22 @@ function draw(gamepadSnapshot) {
   renderer.render(scene, camera);
   // composer.render(scene, camera);
 
+  /* Take input from the gamepad joystick */
+  ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];
+  /* negative sign for y acceleration because on the joystick the
+   * y value is negative when the joystick is pushed up, and the game
+   * uses the opposite convention */
+  ball.acceleration.y = -ball.maxAcceleration * gamepadSnapshot.axes[1];
+
+  /* jump */
+  if (gamepadSnapshot.buttons[0].pressed &&
+      ball.state != ballStateEnum.FALLING_OFF)
+  {
+    if (Math.abs(ball.position.z - ballRadius) < jumpTolerance) {
+      ball.velocity.z = ballJumpVelocity;
+    }
+  }
+
   /* ball physics */
   ballPhysics(ball);
 
@@ -115,11 +133,11 @@ function draw(gamepadSnapshot) {
   }
 
   /* phatak boom */
-  if (explosionFragments.length > 0) {
-    for (var i = 0 ; i < explosionFragments.length ; i++) {
-      ballPhysics(explosionFragments[i]);
-    }
-  }
+  // if (explosionFragments.length > 0) {
+  //   for (var i = 0 ; i < explosionFragments.length ; i++) {
+  //     ballPhysics(explosionFragments[i]);
+  //   }
+  // }
 
   // drawShadows();
  
@@ -144,49 +162,33 @@ function draw(gamepadSnapshot) {
     ball.maxVelocity = 5;
   }
 
-  /* Move the ball */
-  ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];
-  /* negative sign for y acceleration because on the joystick the
-   * y value is negative when the joystick is pushed up, and the game
-   * uses the opposite convention */
-  ball.acceleration.y = -ball.maxAcceleration * gamepadSnapshot.axes[1];
+  // /* activate boost mode! */
+  // if (!boostModeOn &&
+  //      boostModeAvailable &&
+  //      gamepadSnapshot.buttons[3].pressed)
+  // {
+  //   boostModeOn = true;
+  //   boostModeAvailable = false;
+  //   boostModeTimeLeft = boostModeDuration;
+  //   ballMaxVelocity = 10;
+  //   ballMaxAcceleration = 10;
 
-  /* jump */
-  if (gamepadSnapshot.buttons[0].pressed &&
-      ball.state != ballStateEnum.FALLING_OFF)
-  {
-    if (Math.abs(ball.position.z - ballRadius) < jumpTolerance) {
-      ball.velocity.z = 10;
-    }
-  }
+  //   /* start showing a countdown */
+  //   boostCountdownId = window.setInterval(boostCountdown, 1000);
 
-  /* activate boost mode! */
-  if (!boostModeOn &&
-       boostModeAvailable &&
-       gamepadSnapshot.buttons[3].pressed)
-  {
-    boostModeOn = true;
-    boostModeAvailable = false;
-    boostModeTimeLeft = boostModeDuration;
-    ballMaxVelocity = 10;
-    ballMaxAcceleration = 10;
+  //   /* boost mode dies out after some time */
+  //   window.setTimeout(function () {
+  //     boostModeOn = false;
+  //     boostModeTimeLeft = boostModeDuration;
+  //     boostModeDisplay.innerHTML = "";
+  //     window.clearInterval(boostCountdownId);
+  //   }, boostModeDuration);
 
-    /* start showing a countdown */
-    boostCountdownId = window.setInterval(boostCountdown, 1000);
-
-    /* boost mode dies out after some time */
-    window.setTimeout(function () {
-      boostModeOn = false;
-      boostModeTimeLeft = boostModeDuration;
-      boostModeDisplay.innerHTML = "";
-      window.clearInterval(boostCountdownId);
-    }, boostModeDuration);
-
-  }
+  // }
 
   /* reset gamepad axes */
-  gamepadSnapshot.axes[0] = 0;
-  gamepadSnapshot.axes[1] = 0;
+  // gamepadSnapshot.axes[0] = 0;
+  // gamepadSnapshot.axes[1] = 0;
 
   /* Update the FPS counter */
   stats.update();
@@ -213,10 +215,13 @@ function youDied(deathCause) {
 function setupEnemy(speed) {
   var angle = Math.random() * 2 * Math.PI;
 
+  var enemyRadius = Math.floor(Math.random() * (enemyRadiusMax - enemyRadiusMin + 1)) + enemyRadiusMin;
+
   /* enemies spawn slightly outside the perimeter of the ground */
   var spawnX = 1.006 * groundRadius * Math.cos(angle),
       spawnY = 1.006 * groundRadius * Math.sin(angle);
-  var spawnPoint = { x: spawnX, y: spawnY, z: ballRadius };
+  var spawnPoint = { x: spawnX, y: spawnY, z: enemyRadius };
+  // var spawnPoint = { x: spawnX, y: spawnY, z: ballRadius };
 
   /* set spawn speed
    * as the level increases, the enemies get faster */
@@ -234,11 +239,18 @@ function setupEnemy(speed) {
 
   var spawnVel = { x: velX, y: velY, z: velZ };
 
+  // return setupBall(spawnPoint,
+  //                  spawnVel,
+  //                  enemyMaterial,
+  //                  ballRadius,
+  //                  ballGeometry
+  //                  );
+
   return setupBall(spawnPoint,
                    spawnVel,
                    enemyMaterial,
-                   ballRadius,
-                   ballGeometry
+                   enemyRadius,
+                   enemyGeometry[enemyRadius - 6]
                    );
 }
 
@@ -294,11 +306,21 @@ function setupBall(initialPos, initialVel, material, temp_radius, temp_geometry)
 
 function newBall() {
   /* place the ball a little above the center of the ground */
-  ball.position = { x: 0, y: 0, z: ballRadius + 200 };
-  ball.acceleration = { x: 0, y: 0 };
-  ball.velocity = { x: 0, y: 0, z: 0 };
+  ball.position.x = 0;
+  ball.position.y = 0;
+  ball.position.z = ballRadius + 200;
+
+  ball.velocity.x = 0;
+  ball.velocity.y = 0;
+  ball.velocity.z = 0;
+
+  ball.acceleration.x = 0;
+  ball.acceleration.y = 0;
+  ball.acceleration.z = 0;
+
   ball.maxAcceleration = 4;
   ball.maxVelocity = 5;
+
   ball.state = ballStateEnum.IN_THE_AIR;
 
   /* boost mode available again */
@@ -323,20 +345,21 @@ function ballPhysics(b) {
                  (b.state == ballStateEnum.FALLING_OFF);
   b.acceleration.z = (airborne ? gravity : 0);
 
-  /* apply friction */
-  // var x_acc_direction = THREE.Math.sign(b.acceleration.x);
-  // var y_acc_direction = THREE.Math.sign(b.acceleration.y);
+  /* apply air/ground-friction - a quick hack to remove the automove bug */
+  var x_acc_direction = THREE.Math.sign(b.acceleration.x);
+  var y_acc_direction = THREE.Math.sign(b.acceleration.y);
 
-  // var x_friction = b.velocity.x != 0 ? groundFriction : 0;
-  // var y_friction = b.velocity.y != 0 ? groundFriction : 0;
+  var x_friction = b.velocity.x != 0 ? groundFriction : 0;
+  var y_friction = b.velocity.y != 0 ? groundFriction : 0;
 
-  // b.acceleration.x -= x_acc_direction * x_friction;
-  // b.acceleration.y -= y_acc_direction * y_friction;
+  b.acceleration.x -= x_acc_direction * x_friction;
+  b.acceleration.y -= y_acc_direction * y_friction;
 
-  // if (x_acc_direction * b.acceleration.x < 0) { b.acceleration.x = 0; }
-  // if (y_acc_direction * b.acceleration.y < 0) { b.acceleration.y = 0; }
+  if (x_acc_direction * b.acceleration.x < 0) { b.acceleration.x = 0; }
+  if (y_acc_direction * b.acceleration.y < 0) { b.acceleration.y = 0; }
 
   /* new velocities */
+
   b.velocity.x += b.acceleration.x * dt;
   b.velocity.y += b.acceleration.y * dt;
   b.velocity.z -= b.acceleration.z * dt;
@@ -397,9 +420,10 @@ function coinPhysics(key) {
   /* check for a coin pickup */
   var xx = ball.position.x - coin.position.x;
   var yy = ball.position.y - coin.position.y;
+  var zz = ball.position.z - coin.position.z;
   var min_dist = ballRadius + coinThickness + coinPickupTolerance;
   
-  if (xx*xx + yy*yy < min_dist*min_dist && !coin.pickedUp) {
+  if (xx*xx + yy*yy + zz*zz < min_dist*min_dist && !coin.pickedUp) {
     coin.pickedUp = true;
     coinCollected(coin);
   }

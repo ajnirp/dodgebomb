@@ -21,13 +21,14 @@ var cameraElevation = 250,
 
 /* spotlight */
 // var spotLightHeight = 600;
-var spotLightHeight = 1200;
+var spotLightHeight = 900;
 
 var ball; // this is not a constant, i should probably remove it :|
 var ballRadius = 10, enemyRadius = 10, fragmentRadius = 3;
 
 var ballMaxVelocity = 5;
 var ballMaxAcceleration = 4;
+var ballJumpVelocity = 15; /* goes upto 20 with the jump powerup */
 
 var boostModeOn = false;
 var boostModeAvailable = true; /* boost mode is available exactly once per life */
@@ -53,7 +54,7 @@ var enemyRadiusMin = ballRadius - 4;
 var enemyRadiusMax = ballRadius + 4;
 var enemyGeometry = [];
 for (var i = enemyRadiusMin ; i <= enemyRadiusMax ; i++) {
-	enemyGeometry.push(new THREE.SphereGeometry(i, 12, 6));
+  enemyGeometry.push(new THREE.SphereGeometry(i, 12, 6));
 }
 
 /* physics constants */
@@ -77,10 +78,18 @@ var deathCauseEnum = {
 
 /* enum for current state of the ball */
 var ballStateEnum = {
-	IN_THE_AIR: 0, /* the ball is in the middle of a jump */
-	FALLING_OFF: 1, /* the ball crossed bounds and is falling off the edge */
-	EXPLODING: 2, /* the ball got hit by an enemy */
-	NORMAL: 3 /* the ball is safe on the ground and within the game boundary */
+  IN_THE_AIR: 0, /* the ball is in the middle of a jump */
+  FALLING_OFF: 1, /* the ball crossed bounds and is falling off the edge */
+  EXPLODING: 2, /* the ball got hit by an enemy */
+  NORMAL: 3 /* the ball is safe on the ground and within the game boundary */
+}
+
+/* enum for powerups */
+var powerupTypeEnum = {
+  JUMP: 0, /* higher jumps! */
+  BOOST: 1, /* boost mode! */
+  SLOW_ENEMIES: 2, /* enemies move much more slowly */
+  STOP_ENEMIES: 3 /* all currently alive enemies stop and die */
 }
 
 var enemySpawnFrequency = 2000; // msec
@@ -146,3 +155,9 @@ var sounds = {
   blockCoinPickup: false
 
 }
+
+// var powerup = {
+//   radius: 10;
+  
+//   material: new THREE.MeshPhongMaterial()
+// }
