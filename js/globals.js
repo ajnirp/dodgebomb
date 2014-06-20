@@ -13,14 +13,15 @@ var VIEW_ANGLE = 50,
     FAR = 10000;
 
 /* timestep */
-var dt = 0.5;
+var dt = 0.85;
 
 /* camera constants */
 var cameraElevation = 250,
     cameraSetBack = -400;
 
 /* spotlight */
-var spotLightHeight = 600;
+// var spotLightHeight = 600;
+var spotLightHeight = 1200;
 
 var ball; // this is not a constant, i should probably remove it :|
 var ballRadius = 10, enemyRadius = 10, fragmentRadius = 3;
@@ -28,11 +29,11 @@ var ballRadius = 10, enemyRadius = 10, fragmentRadius = 3;
 var ballMaxVelocity = 5;
 var ballMaxAcceleration = 4;
 
-/* boost mode is available exactly once per life */
 var boostModeOn = false;
-var boostModeAvailable = true;
-/* boost mode dies out within 10 secs */
-var boostModeLifetime = 10000;
+var boostModeAvailable = true; /* boost mode is available exactly once per life */
+var boostModeDuration = 8000; /* boost mode dies out within 10 secs */
+var boostModeTimeLeft = boostModeDuration;
+var boostCountdownId;
 
 var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
 var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
@@ -40,12 +41,10 @@ var fragmentMaterial = new THREE.MeshPhongMaterial({ color: 'orange' });
 var ballGeometry = new THREE.SphereGeometry(ballRadius, 12, 6);
 var fragmentGeometry = new THREE.SphereGeometry(fragmentRadius, 12, 6);
 
-// JSON object storing the enemies
+/* JSON object storing the enemies */
 var enemies = {};
-// each enemy gets a unique ID
-var enemyId = 0;
-// each enemy gets a green arrow indicating where they are
-var indicators = {};
+var enemyId = 0; /* each enemy gets a unique ID */
+var indicators = {}; /* each enemy gets a green arrow indicating where they are */
 
 var enemyRadiusMin = ballRadius - 4;
 var enemyRadiusMax = ballRadius + 4;
@@ -67,17 +66,18 @@ var groundRadius = 600;
 
 var bounds = groundRadius*groundRadius + ballRadius*ballRadius;
 
-/* enums */
+/* enum for cause of death */
 var deathCauseEnum = {
-	ENEMY_CONTACT: 0,
-	FELL_OFF_EDGE: 1
+  ENEMY_CONTACT: 0,
+  FELL_OFF_EDGE: 1
 };
 
+/* enum for current state of the ball */
 var ballStateEnum = {
-	IN_THE_AIR: 0,
-	FALLING_OFF: 1,
-	EXPLODING: 2,
-	NORMAL: 3
+	IN_THE_AIR: 0, /* the ball is in the middle of a jump */
+	FALLING_OFF: 1, /* the ball crossed bounds and is falling off the edge */
+	EXPLODING: 2, /* the ball got hit by an enemy */
+	NORMAL: 3 /* the ball is safe on the ground and within the game boundary */
 }
 
 var enemySpawnFrequency = 2000; // msec
@@ -100,9 +100,7 @@ var fragmentLifetime = 7000;
 /* coins */
 var coins = {}; /* global object to store coins */
 var coinId = 0; /* id for each coin */
-// 0xF7DE3A
 var coinColor = 0xffff00;
-// var coinEmissiveColor = 0xCFCE74;
 var coinRadius = 12;
 var coinThickness = 3;
 var coinGeometry = new THREE.CylinderGeometry(coinRadius,
@@ -122,11 +120,13 @@ var coinsCollected = 0;
 var coinPickupTolerance = 25;
 
 /* controls and options */
-var gameOptions = {
-  paused: false,
-  displayScore: true,
-  mute: false
-}
+// var gameOptions = {
+
+//   paused: false,
+//   displayScore: true,
+//   mute: false
+
+// }
 
 /* sounds */
 var sounds = {

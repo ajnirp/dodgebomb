@@ -148,10 +148,10 @@ function draw(gamepadSnapshot) {
 
   /* Move the ball */
   ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];
-  ball.acceleration.y = -ball.maxAcceleration * gamepadSnapshot.axes[1];
   /* negative sign for y acceleration because on the joystick the
    * y value is negative when the joystick is pushed up, and the game
    * uses the opposite convention */
+  ball.acceleration.y = -ball.maxAcceleration * gamepadSnapshot.axes[1];
 
   /* jump */
   if (gamepadSnapshot.buttons[0].pressed &&
@@ -165,17 +165,25 @@ function draw(gamepadSnapshot) {
   /* activate boost mode! */
   if (!boostModeOn &&
        boostModeAvailable &&
-       gamepadSnapshot.buttons[3].pressed) {
+       gamepadSnapshot.buttons[3].pressed)
+  {
     boostModeOn = true;
     boostModeAvailable = false;
+    boostModeTimeLeft = boostModeDuration;
     ballMaxVelocity = 10;
-    // aliveAnnouncement.innerHTML = "Boost mode activated!";
     ballMaxAcceleration = 10;
+
+    /* start showing a countdown */
+    boostCountdownId = window.setInterval(boostCountdown, 1000);
 
     /* boost mode dies out after some time */
     window.setTimeout(function () {
       boostModeOn = false;
-    }, boostModeLifetime);
+      boostModeTimeLeft = boostModeDuration;
+      boostModeDisplay.innerHTML = "";
+      window.clearInterval(boostCountdownId);
+    }, boostModeDuration);
+
   }
 
   /* reset gamepad axes */
@@ -242,18 +250,23 @@ function setupEnemy(speed) {
 
 function spawnEnemy() {
   var enemy = setupEnemy(3);
+
   enemy.id = enemyId;
   var idAdded = enemyId;
   enemy.stoppedMoving = false;
+
   enemies[enemyId++] = enemy;
+
   scene.add(enemy);
   setTimeout(function () {
-    enemies[idAdded].stoppedMoving = true;
-    setTimeout(function () {
-      scene.remove(enemies[idAdded]);
-      delete enemies[idAdded];
-    }, 1000);
-  }, enemySpawnFrequency);
+    if (enemy) {
+      enemy.stoppedMoving = true;
+      enemy.removeTimeout = setTimeout(function () {
+        scene.remove(enemies[idAdded]);
+        delete enemies[idAdded];
+      }, 2000);
+    }
+  }, 2*enemySpawnFrequency);
 }
 
 /* initialise a ball */
@@ -293,8 +306,16 @@ function newBall() {
   ball.maxAcceleration = 4;
   ball.maxVelocity = 5;
   ball.state = ballStateEnum.IN_THE_AIR;
+
+  /* boost mode available again */
   boostModeOn = false;
   boostModeAvailable = true;
+  boostModeTimeLeft = boostModeDuration;
+  boostModeDisplay.innerHTML = "";
+
+  if (boostCountdownId) {
+    clearTimeout(boostCountdownId);
+  }
 
   /* reset score by resetting coinsCollected */
   coinsCollected = 0;
@@ -391,7 +412,6 @@ function coinPhysics(key) {
 }
 
 function coinCollected(coin) {
-  console.log("called coin collected");
   /* clear the removal timeout for the coin */
   window.clearTimeout(coin.timeout);
 

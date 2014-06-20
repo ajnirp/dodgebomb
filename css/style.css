@@ -62,3 +62,12 @@ h1 { text-align: center; }
 	right: 20%;
 	background-color: #207CE6;
 }
+
+#boostModeDisplay {
+	width: 200px;
+	border-radius: 25px;
+	position: absolute;
+	left: 50%;
+	margin-left: -100px;
+	background-color: #119C2D;
+}

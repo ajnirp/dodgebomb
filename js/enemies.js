@@ -10,13 +10,14 @@
 // }
 
 function enemyPhysics(key) {
-  var dt = 0.5;
   var currEnemy = enemies[key];
 
   var xx = currEnemy.position.x;
   var yy = currEnemy.position.y;
 
   if ((xx*xx + yy*yy > bounds + boundsTolerance)) {
+    if (currEnemy.removeTimeout) { clearTimeout(currEnemy.removeTimeout); }
+
     scene.remove(currEnemy);
     delete enemies[key];
     // delete indicators[key];
