@@ -15,6 +15,30 @@ function enemyPhysics(key) {
   var xx = currEnemy.position.x;
   var yy = currEnemy.position.y;
 
+  /* draw indicator */
+  // todo
+  // if (offscreenCheck.isOffscreen(currEnemy, camera)) {
+  //   var intersectionPoint = offscreenCheck.getOffscreenPoint(ball, currEnemy, camera);
+  //   var positionDifference = {
+  //     x: ball.position.x - currEnemy.position.x,
+  //     y: ball.position.y - currEnemy.position.y,
+  //     z: ball.position.z - currEnemy.position.z
+  //   };
+  //   var closerPoint = {
+  //     x: intersectionPoint.x + 0.05 * positionDifference,
+  //     y: intersectionPoint.y + 0.05 * positionDifference,
+  //     z: intersectionPoint.z + 0.05 * positionDifference
+  //   }
+  //   /* add an indicator if it does not already exist */
+  //   if (typeof currEnemy.indicator == 'undefined') {
+  //     console.log("adding indicator");
+  //     console.log(currEnemy.id + " int point " + intersectionPoint.x + " " + intersectionPoint.y + " " + intersectionPoint.z);
+  //     var origin = new THREE.Vector3(0,0,0);
+  //     currEnemy.indicator = new indicator();
+  //     currEnemy.indicator.addToScene(origin, scene);
+  //   }
+  // }
+
   if ((xx*xx + yy*yy > bounds + boundsTolerance)) {
     if (currEnemy.removeTimeout) { clearTimeout(currEnemy.removeTimeout); }
 

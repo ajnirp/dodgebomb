@@ -1,8 +1,6 @@
 /* http://buildnewgames.com/webgl-threejs/ */
 /* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
-console.log("game.js");
-
 /* load stats: https://github.com/mrdoob/stats.js/blob/master/examples/basic.html */
 var stats = new Stats();
 document.body.appendChild(stats.domElement);
@@ -21,22 +19,13 @@ var level = 1;
 /* start periodically spawning enemies after an initial wait */
 window.setTimeout(function () {
   window.setInterval(spawnEnemy, enemySpawnFrequency);
+  // window.setTimeout(spawnEnemy, enemySpawnFrequency);
 }, 3000);
 
 /* start periodically spawning coins after an initial wait */
 window.setTimeout(function () {
   window.setInterval(spawnCoin, coinSpawnFrequency);
 }, 5000);
-
-function isOffScreen(b) {
-  var origin = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
-  var direction = new THREE.Vector3(b.position.x - camera.position.x,
-                                    b.position.y - camera.position.y,
-                                    b.position.z - camera.position.z);
-  raycaster.set(origin, direction.normalize());
-  var intersections = raycaster.intersectObject(b);
-  return (intersections.length == 0);
-}
 
 function setupScene() {
   /* set up renderer */
@@ -142,8 +131,11 @@ function draw(gamepadSnapshot) {
 
   // drawShadows();
  
-  /* spotlight position is fixed
-   * but its focus is towards the ball, always */
+  /* spotlight hovers above the ball */
+  spotLight.position.x = ball.position.x;
+  spotLight.position.y = ball.position.y;
+
+  /* spotlight focus is towards the ball, always */
   spotLight.target.position.x = ball.position.x;
   spotLight.target.position.y = ball.position.y;
 
@@ -151,15 +143,21 @@ function draw(gamepadSnapshot) {
   camera.position.y = cameraSetBack + 0.75 * ball.position.y;
   camera.rotation.y = -0.001 * ball.position.x;
 
+
+  if (gamepadSnapshot.buttons[2].pressed) {
+    var outside = offscreenCheck.isOffscreen(ball, camera);
+    console.log(timeAliveInSec + (outside ? " is offscreen" : " is on-screen"));
+  }
+
   if (gamepadSnapshot.buttons[6].pressed)
   {
-    // ball.velocity.x = 0;
-    // ball.velocity.y = 0;
-    // ball.acceleration.x = 0;
-    // ball.acceleration.y = 0;
-    ball.maxVelocity = 2;
-  } else {
-    ball.maxVelocity = 5;
+    ball.velocity.x = 0;
+    ball.velocity.y = 0;
+    ball.acceleration.x = 0;
+    ball.acceleration.y = 0;
+  //   ball.maxVelocity = 2;
+  // } else {
+  //   ball.maxVelocity = 5;
   }
 
   /* draw the boost trail */

@@ -65,6 +65,44 @@ var enemies = {};
 var enemyId = 0; /* each enemy gets a unique ID */
 // var indicators = {}; /* each enemy gets a green arrow indicating where they are */
 
+//////////////////////////////////////////////////////////////////////////
+
+/* indicator geometry */
+function indicator() {
+  this.geometry = new THREE.Geometry();
+  this.mesh = undefined;
+  this.material = new THREE.MeshBasicMaterial({ color: 0x1EA821 });
+}
+
+indicator.prototype.init = function () {
+  var v1 = new THREE.Vector3(-15,0,15);
+  var v2 = new THREE.Vector3(15,0,15);
+  var v3 = new THREE.Vector3(0,15,15);
+
+  this.geometry.vertices.push(v1);
+  this.geometry.vertices.push(v2);
+  this.geometry.vertices.push(v3);
+
+  this.geometry.faces.push(new THREE.Face3(0,1,2));
+  this.geometry.computeFaceNormals();
+
+  this.mesh = new THREE.Mesh(this.geometry, this.material);
+}
+
+indicator.prototype.addToScene = function (pos, scene) {
+  if (typeof this.mesh == 'undefined') {
+    this.init();
+  }
+
+  this.mesh.position.x = pos.x;
+  this.mesh.position.y = pos.y;
+  this.mesh.position.z = pos.z;
+
+  scene.add(this.mesh);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 /* enemies can have different sizes */
 var enemyRadiusMin = ballRadius - 6;
 var enemyRadiusMax = ballRadius + 6;
@@ -119,7 +157,37 @@ var powerupTypeEnum = {
 
 var enemySpawnFrequency = 2000; // msec
 
-// var raycaster = new THREE.Raycaster();
+/* checking if an object is offscreen */
+var offscreenCheck = {
+  frustum: new THREE.Frustum(),
+  updateFrustum: function (cam) {
+    this.frustum.setFromMatrix(
+      new THREE.Matrix4().multiply(cam.projectionMatrix,
+                                   cam.matrixWorldInverse)
+    );
+  },
+  isOffscreen: function (obj, cam) {
+    this.updateFrustum(cam);
+    var objPosition = new THREE.Vector3(obj.position.x,
+                                      obj.position.y,
+                                      obj.position.z);
+    return !this.frustum.containsPoint(objPosition);
+  },
+  getOffscreenPoint: function (ball, obj, cam) {
+    this.updateFrustum(cam);
+    var planes = this.frustum.planes;
+    var ballPos = new THREE.Vector3(ball.position.x, ball.position.y, ball.position.z);
+    var objPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+    var joiningLine = new THREE.Line3(ballPos, objPos);
+    for (var i = 0 ; i < 6 ; i++) {
+      var plane = planes[i];
+      var intersectionPoint = plane.intersectLine(joiningLine);
+      if (typeof intersectionPoint != 'undefined') {
+        return intersectionPoint;
+      }
+    }
+  }
+}
 
 /* number of explosion fragments generated when an enemy hits our hero.
  * note that while explosion fragments persist in the scene, another explosion
