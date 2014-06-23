@@ -26,7 +26,13 @@ var gamepadSupport = {
   prevTimestamp: undefined,
   tick: function() {
     gamepadSupport.pollGamepads();
-    draw(navigator.getGamepads()[0]);
+    var gamepadSnap = navigator.getGamepads()[0];
+    if (gamepadSnap.buttons[7].pressed) {
+      gameOptions.togglePause();
+    }
+    if (!gameOptions.paused) {
+      draw(gamepadSnap);
+    }
     window.requestAnimationFrame(gamepadSupport.tick);
   },
   pollGamepads: function() {

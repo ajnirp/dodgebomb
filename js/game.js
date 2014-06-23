@@ -1,6 +1,8 @@
 /* http://buildnewgames.com/webgl-threejs/ */
 /* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
+console.log("game.js");
+
 /* load stats: https://github.com/mrdoob/stats.js/blob/master/examples/basic.html */
 var stats = new Stats();
 document.body.appendChild(stats.domElement);
@@ -25,12 +27,6 @@ window.setTimeout(function () {
 window.setTimeout(function () {
   window.setInterval(spawnCoin, coinSpawnFrequency);
 }, 5000);
-
-/* debugging stuff - periodic logs */
-// window.setInterval(function () {
-//   console.log("e " + Object.keys(enemies).length);
-//   console.log("c " + Object.keys(coins).length);
-// }, 5000);
 
 function isOffScreen(b) {
   var origin = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z);
@@ -92,7 +88,12 @@ function setupScene() {
   scene.add(plane);
 
   /* temp shadow */
-  var shadow = new THREE.EllipseCurve();
+  // var shadow = new THREE.EllipseCurve();
+
+  /* initialise the boost trail */
+  // for (var i = 0 ; i < boostTrail.array.length ; i++) {
+  //   boostTrail.array[i] = JSON.parse(JSON.stringify(ball));
+  // }
 }
 
 function draw(gamepadSnapshot) {
@@ -150,8 +151,7 @@ function draw(gamepadSnapshot) {
   camera.position.y = cameraSetBack + 0.75 * ball.position.y;
   camera.rotation.y = -0.001 * ball.position.x;
 
-  if (gamepadSnapshot.buttons[6].pressed ||
-      gamepadSnapshot.buttons[7].pressed)
+  if (gamepadSnapshot.buttons[6].pressed)
   {
     // ball.velocity.x = 0;
     // ball.velocity.y = 0;
@@ -162,33 +162,32 @@ function draw(gamepadSnapshot) {
     ball.maxVelocity = 5;
   }
 
+  /* draw the boost trail */
+  // boostTrail.shiftTrail(JSON.parse(JSON.stringify(ball)), scene);
+
   // /* activate boost mode! */
-  // if (!boostModeOn &&
-  //      boostModeAvailable &&
-  //      gamepadSnapshot.buttons[3].pressed)
-  // {
-  //   boostModeOn = true;
-  //   boostModeAvailable = false;
-  //   boostModeTimeLeft = boostModeDuration;
-  //   ballMaxVelocity = 10;
-  //   ballMaxAcceleration = 10;
+  if (!boostModeOn &&
+       boostModeAvailable &&
+       gamepadSnapshot.buttons[3].pressed)
+  {
+    boostModeOn = true;
+    boostModeAvailable = false;
+    boostModeTimeLeft = boostModeDuration;
+    ballMaxVelocity = 10;
+    ballMaxAcceleration = 10;
 
-  //   /* start showing a countdown */
-  //   boostCountdownId = window.setInterval(boostCountdown, 1000);
+    /* start showing a countdown */
+    boostCountdownId = window.setInterval(boostCountdown, 1000);
 
-  //   /* boost mode dies out after some time */
-  //   window.setTimeout(function () {
-  //     boostModeOn = false;
-  //     boostModeTimeLeft = boostModeDuration;
-  //     boostModeDisplay.innerHTML = "";
-  //     window.clearInterval(boostCountdownId);
-  //   }, boostModeDuration);
+    /* boost mode dies out after some time */
+    window.setTimeout(function () {
+      boostModeOn = false;
+      boostModeTimeLeft = boostModeDuration;
+      boostModeDisplay.innerHTML = "";
+      window.clearInterval(boostCountdownId);
+    }, boostModeDuration);
 
-  // }
-
-  /* reset gamepad axes */
-  // gamepadSnapshot.axes[0] = 0;
-  // gamepadSnapshot.axes[1] = 0;
+  }
 
   /* Update the FPS counter */
   stats.update();
@@ -250,7 +249,7 @@ function setupEnemy(speed) {
                    spawnVel,
                    enemyMaterial,
                    enemyRadius,
-                   enemyGeometry[enemyRadius - 6]
+                   enemyGeometry[enemyRadius - enemyRadiusMin]
                    );
 }
 

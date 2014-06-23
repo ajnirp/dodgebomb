@@ -71,3 +71,15 @@ h1 { text-align: center; }
 	margin-left: -100px;
 	background-color: #119C2D;
 }
+
+#pauseDisplay {
+	position: absolute;
+	text-align: center;
+	z-index: 1000;
+	left: 50%;
+	top: 50%;
+	color: white;
+	width: 500px;
+	margin-left: -250px;
+	font-size: 64px;
+}

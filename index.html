@@ -1,49 +1,20 @@
-<!-- http://jsconsole.com/remote-debugging.html -->
-
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Dodgebomb</title>
-    <link href="css/style.css" rel="stylesheet">
-  </head>
-  <body>
-    <div id="infoDisplay">
-      <div id="timeDisplay">
-        Time <span id="timeAlive">0</span>
-      </div>
-
-      <div id="coinDisplay">
-        Score <span id="scoreDisplay">0</span>
-      </div>
-
-      <div id="boostModeDisplay">
-      </div>
-    </div>
-    <div id="gameCanvas"></div>
-    <script src="http://jsconsole.com/remote.js?8B83FDEA-DD1F-4715-A463-E7D38C5C81B3"></script>
-
-    <script src="js/stats.min.js"></script>
-    <script src="js/three.min.js"></script>
-    <script src="js/BufferGeometryUtils.js"></script>
-    <script src="js/howler.min.js"></script>
-
-    <script src="js/globals.js"></script>
-
-    <script src="js/coins.js"></script>
-    <script src="js/gamepad.js"></script>
-    <!-- script src="js/spotlight.js"></script -->
-    <script src="js/camera.js"></script>
-    <!-- script src="js/fragments.js"></script -->
-    <script src="js/game.js"></script>
-    <script src="js/ball.js"></script>
-    <script src="js/enemies.js"></script>
-    <script src="js/coins.js"></script>
-    <script src="js/timer.js"></script>
-
-    <script>
-      setupScene();
-      gamepadSupport.tick();
-    </script>
-  </body>
+<head>
+  <title>Dodgebomb</title>
+  <script src="js/gamepad.js"></script>
+  <link href="css/index.css" rel="stylesheet">
+  <script src="http://jsconsole.com/remote.js?72F31278-CF93-4B08-A175-8CBCB525D6A3"></script>
+</head>
+<body>
+  <div id="menu">
+    <h1>Dodgebomb</h1>
+    <div id="menu0" class="menuItems">New Game</div>
+    <div id="menu1" class="menuItems">Options</div>
+    <div id="menu2" class="menuItems">Help</div>
+    <div id="menu3" class="menuItems">High Scores</div>
+  </div>
+  <!-- <div id="debugger"></div> -->
+  <script src="js/splash.js"></script>
+</body>
 </html>

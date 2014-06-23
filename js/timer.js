@@ -2,11 +2,13 @@
 
 var timeAliveInSec = 0;
 var timeAliveSpan = document.getElementById("timeAlive");
-setInterval(setTime, 1000);
+window.setInterval(setTime, 1000);
 
 function setTime() {
-  timeAliveSpan.innerHTML = timeAliveInSec + "";
-  timeAliveInSec++;
+  if (!gameOptions.paused) {
+    timeAliveSpan.innerHTML = timeAliveInSec + "";
+    timeAliveInSec++;
+  }
 }
 
 function boostCountdown () {
