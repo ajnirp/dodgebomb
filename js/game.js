@@ -123,11 +123,10 @@ function draw(gamepadSnapshot) {
   }
 
   /* phatak boom */
-  // if (explosionFragments.length > 0) {
-  //   for (var i = 0 ; i < explosionFragments.length ; i++) {
-  //     ballPhysics(explosionFragments[i]);
-  //   }
-  // }
+  for (var i = 0 ; i < explosionFragments.length ; i++) {
+    var fragment = explosionFragments[i];
+    ballPhysics(fragment);
+  }
 
   // drawShadows();
  
@@ -197,11 +196,11 @@ function youDied(deathCause) {
     timeAliveInSec = 0;
   }
   else {
-    // spawnFragments({
-    //   x: ball.position.x,
-    //   y: ball.position.y,
-    //   z: ball.position.z
-    // });
+    spawnFragments({
+      x: ball.position.x,
+      y: ball.position.y,
+      z: ball.position.z
+    });
 
     /* and finally, kill off the current ball and get a new one */
     newBall();
@@ -235,13 +234,6 @@ function setupEnemy(speed) {
   velY *= speed / sqrtXY;
 
   var spawnVel = { x: velX, y: velY, z: velZ };
-
-  // return setupBall(spawnPoint,
-  //                  spawnVel,
-  //                  enemyMaterial,
-  //                  ballRadius,
-  //                  ballGeometry
-  //                  );
 
   return setupBall(spawnPoint,
                    spawnVel,
@@ -282,7 +274,9 @@ function setupBall(initialPos, initialVel, material, temp_radius, temp_geometry)
   if (typeof(initialPos) == 'undefined') {
     b.position = { x: 0, y: 0, z: b.radius };
   } else {
-    b.position = initialPos;
+    b.position.x = initialPos.x;
+    b.position.y = initialPos.y;
+    b.position.z = initialPos.z;
   }
 
   /* initialise velocity */
@@ -378,7 +372,7 @@ function ballPhysics(b) {
   var xx = b.position.x;
   var yy = b.position.y;
 
-  if (xx*xx + yy*yy > bounds/* + boundsTolerance*/) {
+  if (xx*xx + yy*yy > bounds/* + boundsTolerance*/ && b == ball) {
     youDied(deathCauseEnum.FELL_OFF_EDGE);
   }
 
@@ -407,6 +401,47 @@ function ballPhysics(b) {
       }
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+function setupCoin() {
+  var temp_coin = new THREE.Mesh(coinGeometry, coinMaterial);
+  temp_coin.timeout = undefined; /* the coin removal timeout */
+  temp_coin.pickedUp = false;
+  return temp_coin;
+}
+
+function spawnCoin() {
+  var coin = setupCoin();
+
+  /* in order to set the position of the coin, sample a
+   * position uniformly on the face of a sphere as follows:
+   * eps = Math.random()
+   * theta = 2 * pi * eps
+   * rad = sqrt(eps) * Rad
+   * where rad = distance from centre
+   *       theta = angle wrt horizontal radius
+   *       Rad = radius of the sphere on which we are sampling
+   */
+
+  var rad = Math.pow(Math.random(), 0.5) * groundRadius;
+  var theta = 2 * Math.PI * Math.random();
+
+  var spawnX = rad * Math.cos(theta);
+  var spawnY = rad * Math.sin(theta);
+
+  coin.position.set(spawnX, spawnY, coinRadius);
+  coin.id = coinId;
+  scene.add(coin);
+  coins[coinId++] = coin;
+
+  coin.timeout = window.setTimeout(function () {
+    scene.remove(coins[coin.id]);
+    delete coins[coin.id];
+  }, coinLifetime);
+
+  return coin;
 }
 
 function coinPhysics(key) {
@@ -439,4 +474,54 @@ function coinCollected(coin) {
   
   /* update the number of coins collected and display the new score */
   scoreDisplaySpan.innerHTML = 100 * (++coinsCollected);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+function spawnFragments(spawnPos) {
+  /* spawn a bunch of miniballs and make them explode away from the
+   * center. Their velocity vectors should be from the center and
+   * through a radius of the circle. The radii for each velocity
+   * vector should be equiangular with their neighbours
+   */
+  var multiplier = 2 * Math.PI / numExplosionFragments;
+  for (var i = 0 ; i < numExplosionFragments ; i++) {
+    var angle = multiplier * i;
+    var velX = 30 * Math.cos(angle);
+    var velY = 30 * Math.sin(angle);
+    var fragmentVel = { x: velX, y: velY, z: 10 };
+    // var fragmentVel = { x: 1, y: 1, z: 0 };
+    var explosionFragment = setupBall(spawnPos,
+                                      fragmentVel,
+                                      fragmentMaterial,
+                                      fragmentRadius,
+                                      fragmentGeometry);
+    explosionFragments.push(explosionFragment);
+    explosionFragment.acceleration = { x: 0, y: 0, z: 0 };
+    explosionFragment.state = ballStateEnum.NORMAL;
+    scene.add(explosionFragment);
+  }
+  /* set a timeout to clear the fragments after a while */
+  window.setTimeout(clearFragments, fragmentLifetime);
+}
+
+function clearFragments() {
+  /* clean up the first numExplosionFragments fragments from the array
+   * of explosion fragments */
+  for (var i = 0 ; i < numExplosionFragments ; i++) {
+    scene.remove(explosionFragments[i]);
+  }
+  explosionFragments.splice(0, numExplosionFragments);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+function collisionBetween(b1, b2) {
+  var xx = b1.position.x - b2.position.x;
+  var yy = b1.position.y - b2.position.y;
+  var zz = b1.position.z - b2.position.z;
+
+  var min_distance = b1.radius + b2.radius;
+
+  return xx*xx + yy*yy + zz*zz <= min_distance*min_distance;
 }

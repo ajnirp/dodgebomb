@@ -60,13 +60,3 @@ function enemyPhysics(key) {
     currEnemy.position.y += currEnemy.velocity.y * dt;
   }
 }
-
-function collisionBetween(b1, b2) {
-  var xx = b1.position.x - b2.position.x;
-  var yy = b1.position.y - b2.position.y;
-  var zz = b1.position.z - b2.position.z;
-
-  var min_distance = b1.radius + b2.radius;
-
-  return xx*xx + yy*yy + zz*zz <= min_distance*min_distance;
-}
