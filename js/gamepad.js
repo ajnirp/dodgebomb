@@ -31,7 +31,7 @@ var gamepadSupport = {
       gameOptions.togglePause();
     }
     if (!gameOptions.paused) {
-      draw(gamepadSnap);
+      run(gamepadSnap);
     }
     window.requestAnimationFrame(gamepadSupport.tick);
   },

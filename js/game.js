@@ -85,11 +85,19 @@ function setupScene() {
   // }
 }
 
-function draw(gamepadSnapshot) {
-  /* draw the game elements */
-  renderer.render(scene, camera);
-  // composer.render(scene, camera);
+/* Main game loop */
+function run(gamepadSnapshot) {
+  draw();
+  update(gamepadSnapshot);
+}
 
+/* Draw the game elements */
+function draw() {
+  renderer.render(scene, camera);
+}
+
+/* Update game elements, create events etc. */
+function update(gamepadSnapshot) {
   /* Take input from the gamepad joystick */
   ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];
   /* negative sign for y acceleration because on the joystick the
