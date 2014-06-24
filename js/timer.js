@@ -15,9 +15,3 @@ function boostCountdown () {
   boostModeDisplay.innerHTML = "Boost mode: " + (boostModeTimeLeft / 1000);
   boostModeTimeLeft -= 1000;
 }
-
-/* level up after 50 seconds */
-// setInterval(levelUp, 50000);
-
-// function levelUp() {
-// }

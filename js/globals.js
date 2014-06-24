@@ -25,7 +25,7 @@ var spotLightHeight = 900;
 ////////////////////////////////////////////////////////////////////////////////
 
 var ball; // this is not a constant, i should probably remove it :|
-var ballRadius = 10, enemyRadius = 10, fragmentRadius = 3;
+var ballRadius = 10, enemyRadius = 10;
 
 var ballMaxVelocity = 5;
 var ballMaxAcceleration = 4;
@@ -58,7 +58,6 @@ var enemyMaterial = new THREE.MeshPhongMaterial({ color: 'grey' });
 var ballRedMaterial = new THREE.MeshPhongMaterial({ color: 'red' });
 var fragmentMaterial = new THREE.MeshPhongMaterial({ color: 'orange' });
 var ballGeometry = new THREE.SphereGeometry(ballRadius, 12, 6);
-var fragmentGeometry = new THREE.SphereGeometry(fragmentRadius, 12, 6);
 
 /* JSON object storing the enemies */
 var enemies = {};
@@ -190,6 +189,9 @@ var offscreenCheck = {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+var fragmentRadius = 6;
+var fragmentGeometry = new THREE.SphereGeometry(fragmentRadius, 12, 6);
 
 /* number of explosion fragments generated when an enemy hits our hero.
  * note that while explosion fragments persist in the scene, another explosion
