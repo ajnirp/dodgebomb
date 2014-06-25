@@ -453,13 +453,13 @@ function ballPhysics(b) {
 ////////////////////////////////////////////////////////////////////////////////
 
 function setupCoin() {
+
   var temp_coin = new THREE.Mesh(coinGeometry, coinMaterial);
-  temp_coin.timeout = undefined; /* the coin removal timeout */
-  temp_coin.pickedUp = false;
   return temp_coin;
 }
 
 function spawnCoin() {
+
   var coin = setupCoin();
 
   /* in order to set the position of the coin, sample a
@@ -477,11 +477,18 @@ function spawnCoin() {
 
   var spawnX = rad * Math.cos(theta);
   var spawnY = rad * Math.sin(theta);
+  var spawnZ = 200;
 
-  coin.position.set(spawnX, spawnY, coinRadius);
+  coin.position.set(spawnX, spawnY, spawnZ);
+  coin.velocity = { x: 0, y: 0, z: 0 };
+
+  coin.state = coinStateEnum.IN_THE_AIR;
+
   coin.id = coinId;
   scene.add(coin);
   coins[coinId++] = coin;
+
+  coin.pickedUp = false;
 
   coin.timeout = setTimeout(function () {
     scene.remove(coins[coin.id]);
@@ -492,20 +499,64 @@ function spawnCoin() {
 }
 
 function coinPhysics(key) {
+
   var coin = coins[key];
-  /* rotate the coin */
-  coin.rotation.z += 0.1;
+
+  /* rotate the coin if it is on the ground */
+  if (coin.state == coinStateEnum.NORMAL) {
+
+    coin.rotation.z += 0.1;
+
+  }
+
+  else if (coin.state == coinStateEnum.IN_THE_AIR) {
+
+    /* coins only move in the up-down direction */
+    coin.velocity.z -= gravity * dt;
+
+    var newPosition = coin.position.z + coin.velocity.z * dt;
+
+    if (newPosition < coinRadius) {
+
+      /* no more bouncing */
+      if (Math.abs(coin.velocity.z) < ballInAirTolerance)  {
+
+        coin.position.z = coinRadius;
+        coin.velocity.z = 0;
+        coin.state = coinStateEnum.NORMAL;
+
+      }
+
+      /* the coin lives to see another bounce! */
+      else {
+
+        coin.velocity.z *= -1 * groundRestitutionCoefficient;
+        coin.state = coinStateEnum.IN_THE_AIR;
+
+      }
+
+    }
+
+    else {
+
+      coin.position.z = newPosition;
+
+    }
+
+  }
 
   /* check for a coin pickup */
   var xx = ball.position.x - coin.position.x;
   var yy = ball.position.y - coin.position.y;
   var zz = ball.position.z - coin.position.z;
+
   var min_dist = ballRadius + coinThickness + coinPickupTolerance;
   
   if (xx*xx + yy*yy + zz*zz < min_dist*min_dist && !coin.pickedUp) {
     coin.pickedUp = true;
     coinCollected(coin);
   }
+
 }
 
 function coinCollected(coin) {

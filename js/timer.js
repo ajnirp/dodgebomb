@@ -2,18 +2,27 @@
 
 var timeAliveInSec = 0;
 var timeAliveSpan = document.getElementById("timeAlive");
+
 window.setInterval(setTime, 1000);
 
 function setTime() {
+
   if (!gameOptions.paused) {
+
     timeAliveSpan.innerHTML = timeAliveInSec + "";
     timeAliveInSec++;
+
   }
+
 }
 
 function boostCountdown () {
+
   if (!gameOptions.paused) {
+
     boostModeDisplay.innerHTML = "Boost mode: " + (boostModeTimeLeft / 1000);
     boostModeTimeLeft -= 1000;
+
   }
+
 }
