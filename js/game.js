@@ -83,8 +83,8 @@ function setupScene() {
 function run(gamepadSnapshot) {
 
   var now = new Date().getTime();
-  var frameDuration = now - lastTimeCalled;
-  lastTimeCalled = now;
+  var frameDuration = now - lastTimeRunCalled;
+  lastTimeRunCalled = now;
 
   dt = (frameDuration * 60 / 1000) * 0.85;
 

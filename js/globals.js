@@ -8,7 +8,7 @@
 
 /* Animation stuff */
 
-var lastTimeCalled = new Date().getTime();
+var lastTimeRunCalled = new Date().getTime();
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -231,28 +231,42 @@ var coinPickupTolerance = 25;
 var gameOptions = {
 
   paused: false,
+
   displayScore: true,
+
   mute: false,
 
   pauseDisplayDiv: document.getElementById("pauseDisplay"),
+
   pauseBlocked: false,
 
   togglePause: function () {
+
     if (!gameOptions.pauseBlocked) {
+
       gameOptions.pauseBlocked = true;
       gameOptions.paused ? gameOptions.unpauseGame() : gameOptions.pauseGame();
+
     }
+
     window.setTimeout(function () { gameOptions.pauseBlocked = false }, 200);
+
   },
 
   pauseGame: function () {
+
     gameOptions.paused = true;
     gameOptions.pauseDisplayDiv.innerHTML = "PAUSED";
+
   },
 
   unpauseGame: function() {
+
     gameOptions.paused = false;
     gameOptions.pauseDisplayDiv.innerHTML = "";
+
+    lastTimeRunCalled = new Date().getTime();
+
   }
 
 }
