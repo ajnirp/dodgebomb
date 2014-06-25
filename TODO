@@ -69,3 +69,5 @@ todo
 			enemy contact
 	mute button
 	show/hide score by pressing button
+
+CURRENT GOAL - USE REQUESTANIMATIONFRAME to get the last time, and using that, change the delta variable
