@@ -12,6 +12,8 @@ function setTime() {
 }
 
 function boostCountdown () {
-  boostModeDisplay.innerHTML = "Boost mode: " + (boostModeTimeLeft / 1000);
-  boostModeTimeLeft -= 1000;
+  if (!gameOptions.paused) {
+    boostModeDisplay.innerHTML = "Boost mode: " + (boostModeTimeLeft / 1000);
+    boostModeTimeLeft -= 1000;
+  }
 }

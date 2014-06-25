@@ -83,19 +83,16 @@ function setupScene() {
 function run(gamepadSnapshot) {
 
   var now = new Date().getTime();
-  var frameDuration = now - lastTimeRunCalled;
+  var frameDuration = lastTimeRunCalled ? now - lastTimeRunCalled : (1000 / 60);
   lastTimeRunCalled = now;
 
   dt = (frameDuration * 60 / 1000) * 0.85;
 
-  draw();
+  /* Draw the game elements */
+  renderer.render(scene, camera);
+
   update(gamepadSnapshot);
 
-}
-
-/* Draw the game elements */
-function draw() {
-  renderer.render(scene, camera);
 }
 
 /* Update game elements, create events etc. */
@@ -159,8 +156,8 @@ function update(gamepadSnapshot) {
   //   console.log(timeAliveInSec + (outside ? " is offscreen" : " is on-screen"));
   // }
 
-  if (gamepadSnapshot.buttons[6].pressed)
-  {
+  if (gamepadSnapshot.buttons[6].pressed) {
+
     ball.velocity.x = 0;
     ball.velocity.y = 0;
     ball.acceleration.x = 0;
@@ -168,6 +165,7 @@ function update(gamepadSnapshot) {
   //   ball.maxVelocity = 2;
   // } else {
   //   ball.maxVelocity = 5;
+
   }
 
   /* draw the boost trail */
@@ -203,21 +201,29 @@ function update(gamepadSnapshot) {
 }
 
 function youDied(deathCause) {
+
   if (deathCause === deathCauseEnum.FELL_OFF_EDGE) {
+
     ball.state = ballStateEnum.FALLING_OFF;
     timeAliveInSec = 0;
+
   }
   else {
+
     spawnFragments({
+
       x: ball.position.x,
       y: ball.position.y,
       z: ball.position.z
+
     });
 
     /* and finally, kill off the current ball and get a new one */
     newBall();
     timeAliveInSec = 0;
+
   }
+
 }
 
 function setupEnemy(speed) {
@@ -307,7 +313,31 @@ function setupBall(initialPos, initialVel, material, temp_radius, temp_geometry)
   return b;
 }
 
+function newBallCountdown() {
+
+  ball.state = ballStateEnum.COUNTDOWN;
+
+  var countdownTotalTime = 3;
+  var countdownTimeoutTime = countdownTotalTime * 700;
+  var countdown = countdownTotalTime;
+  var countdownDisplayDiv = document.getElementById("newBallCountdownDisplay");
+
+  countdownDisplayDiv.innerHTML = countdown--;
+  var countdownIntervalId = window.setInterval(function () {
+    countdownDisplayDiv.innerHTML = countdown--;
+  }, 700);
+
+  window.setTimeout(function () {
+    window.clearInterval(countdownIntervalId);
+    countdownDisplayDiv.innerHTML = "";
+    ball.state = ballStateEnum.IN_THE_AIR;
+  }, countdownTimeoutTime);
+
+}
+
 function newBall() {
+  newBallCountdown();
+
   /* place the ball a little above the center of the ground */
   ball.position.x = 0;
   ball.position.y = 0;
@@ -324,7 +354,7 @@ function newBall() {
   ball.maxAcceleration = 4;
   ball.maxVelocity = 5;
 
-  ball.state = ballStateEnum.IN_THE_AIR;
+  // ball.state = ballStateEnum.IN_THE_AIR;
 
   /* boost mode available again */
   boostModeOn = false;
@@ -342,6 +372,11 @@ function newBall() {
 }
 
 function ballPhysics(b) {
+
+  if (b.state && b.state == ballStateEnum.COUNTDOWN) {
+    return;
+  }
+
   if (b.position.z > b.radius) { b.state = ballStateEnum.IN_THE_AIR; }
 
   var airborne = (b.state == ballStateEnum.IN_THE_AIR) ||
@@ -581,7 +616,10 @@ function enemyPhysics(key) {
 
     /* check for a collision */
     if (collisionBetween(currEnemy, ball)) {
+      
+      sounds.explosion.play();
       youDied(deathCauseEnum.ENEMY_CONTACT);
+
     }
 
     /* move the enemy */

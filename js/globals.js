@@ -8,7 +8,7 @@
 
 /* Animation stuff */
 
-var lastTimeRunCalled = new Date().getTime();
+var lastTimeRunCalled = undefined;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -133,7 +133,8 @@ var ballStateEnum = {
   IN_THE_AIR: 0, /* the ball is in the middle of a jump */
   FALLING_OFF: 1, /* the ball crossed bounds and is falling off the edge */
   EXPLODING: 2, /* the ball got hit by an enemy */
-  NORMAL: 3 /* the ball is safe on the ground and within the game boundary */
+  NORMAL: 3, /* the ball is safe on the ground and within the game boundary */
+  COUNTDOWN: 4 /* the 3-2-1 countdown is taking place */
 }
 
 /* enum for powerups */

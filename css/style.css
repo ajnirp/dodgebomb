@@ -72,14 +72,22 @@ h1 { text-align: center; }
 	background-color: #119C2D;
 }
 
-#pauseDisplay {
+.absolutelyCentered {
 	position: absolute;
 	text-align: center;
 	z-index: 1000;
 	left: 50%;
 	top: 50%;
 	color: white;
+	font-size: 64px;
+}
+#pauseDisplay {
 	width: 500px;
 	margin-left: -250px;
-	font-size: 64px;
+}
+
+#newBallCountdownDisplay {
+	border-radius: 30px;
+	width: 50px;
+	margin-left: -25px;
 }
