@@ -60,14 +60,14 @@ current plan
 
 
 todo
-	coin pick up - rise and fade
-	coin colors need to be better
-	play sound
+	coin pick up - rise and fade - won't do
+	coin colors need to be better - won't do
+	play sound - done, except death by falling off
 		coin pick up
 		death
 			fall off
 			enemy contact
-	mute button
-	show/hide score by pressing button
-
-CURRENT GOAL - USE REQUESTANIMATIONFRAME to get the last time, and using that, change the delta variable
+	mute button - need to do
+	show/hide score by pressing button - maybe not?
+	options - mute etc. also, should be able to access options during the game itself
+	better logo!
