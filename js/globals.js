@@ -4,6 +4,14 @@
  *
  ****************************************/
 
+////////////////////////////////////////////////////////////////////////////////
+
+/* Animation stuff */
+
+var lastTimeCalled = new Date().getTime();
+
+////////////////////////////////////////////////////////////////////////////////
+
 /* GL constants */
 var WIDTH = 800, 
     HEIGHT = 480;
@@ -38,19 +46,6 @@ var boostModeAvailable = true; /* boost mode is available exactly once per life 
 var boostModeDuration = 10000; /* boost mode dies out within 10 secs */
 var boostModeTimeLeft = boostModeDuration;
 var boostCountdownId;
-
-/* Trail of "previous-positions" of the ball that will be displayed when
- * boostMode is on */
-
-// var boostTrail = {
-//   array: new Array(15),
-//   currIndex: 0,
-//   shiftTrail: function (ballCopy, scene) {
-//     scene.remove(boostTrail.array[boostTrail.currIndex]);
-//     array[++boostTrail.currIndex] = ballCopy;
-//     scene.add(boostTrail.array[boostTrail.currIndex]);
-//   }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 

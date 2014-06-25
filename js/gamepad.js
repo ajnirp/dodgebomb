@@ -31,14 +31,21 @@ var gamepadSupport = {
 
     gamepadSupport.pollGamepads();
     var gamepadSnap = navigator.getGamepads()[0];
+
     if (gamepadSnap.buttons[7].pressed) {
+
       gameOptions.togglePause();
-      TimeoutManager.togglePause();
-      IntervalManager.togglePause();
+      // TimeoutManager.togglePause();
+      // IntervalManager.togglePause();
+      
     }
+
     if (!gameOptions.paused) {
+
       run(gamepadSnap);
+
     }
+
     window.requestAnimationFrame(gamepadSupport.tick);
 
   },
@@ -46,16 +53,21 @@ var gamepadSupport = {
   pollGamepads: function() {
 
     var rawGamepad = navigator.getGamepads()[0];
+
     if (rawGamepad) {
+
       gamepadSupport.gamepad = undefined;
       var gamepadChanged = false;
+
       // This condition is true when exactly one of the LHS and RHS
       // is undefined
       if (typeof rawGamepad != gamepadSupport.prevRawGamepadType) {
         gamepadChanged = true;
         gamepadSupport.prevRawGamepadType = typeof rawGamepad;
       }
+
       gamepadSupport.gamepad = rawGamepad;
+
     }
 
   }

@@ -17,25 +17,31 @@ var TimeoutManager = {
   clearTimeout: function (tId) {
 
     window.clearTimeout(tId);
-    delete idToTimeoutMap[tId];
+    delete this.idToTimeoutMap[tId];
 
   },
 
   togglePause: function () {
 
-    if (gameOptions.paused) {
-      this.unpause();
-    }
+    if (!gameOptions.pauseBlocked) {
 
-    else {
-      this.pause();
+      if (gameOptions.paused) {
+        this.pause();
+      }
+
+      else {
+        this.unpause();
+      }
+      
     }
 
   },
 
   pause: function () {
 
-    for (var tId in idToTimeoutMap) {
+    // console.log("paused " + Object.keys(this.idToTimeoutMap).length);
+
+    for (var tId in this.idToTimeoutMap) {
       /* this is the important part - we only clear the timeout from
        * the window object, not from the idToTimeoutMap! */
       window.clearTimeout(tId);
@@ -48,17 +54,19 @@ var TimeoutManager = {
 
   unpause: function () {
 
-    for (var tId in idToTimeoutMap) {
+    // console.log("unpaused " + Object.keys(this.idToTimeoutMap).length);
+
+    for (var tId in this.idToTimeoutMap) {
 
       /* get the timeout */
-      var timeout = idToTimeoutMap[tId];
+      var timeout = this.idToTimeoutMap[tId];
 
       /* how much time is left in the timeout */
       var timeLeft = timeout.start + timeout.duration - this.timeLastKnown;
       
       /* update the attributes of the timeout */
       timeout.duration = timeLeft;
-      timeout.start = new Date.getTime();
+      timeout.start = new Date().getTime();
       
       /* set the window event
        * no need to create a new timeout in the idToTimeoutMap */

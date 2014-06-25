@@ -17,25 +17,29 @@ var IntervalManager = {
   clearInterval: function (tId) {
 
     window.clearInterval(tId);
-    delete idToIntervalMap[tId];
+    delete this.idToIntervalMap[tId];
 
   },
 
   togglePause: function () {
 
-    if (gameOptions.paused) {
-      this.unpause();
-    }
+    if (!gameOptions.pauseBlocked) {
 
-    else {
-      this.pause();
+      if (gameOptions.paused) {
+        this.pause();
+      }
+
+      else {
+        this.unpause();
+      }
+      
     }
 
   },
 
   pause: function () {
 
-    for (var tId in idToIntervalMap) {
+    for (var tId in this.idToIntervalMap) {
       /* this is the important part - we only clear the interval from
        * the window object, not from the idToIntervalMap! */
       window.clearInterval(tId);
@@ -48,10 +52,10 @@ var IntervalManager = {
 
   unpause: function () {
 
-    for (var tId in idToIntervalMap) {
+    for (var tId in this.idToIntervalMap) {
 
       /* get the interval */
-      var interval = idToIntervalMap[tId];
+      var interval = this.idToIntervalMap[tId];
 
       var elapsedTime = this.timeLastKnown - interval.start;
       var elapsedDuration = elapsedTime % interval.duration;

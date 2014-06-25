@@ -17,14 +17,13 @@ var renderer, camera, scene, spotLight;
 var level = 1;
 
 /* start periodically spawning enemies after an initial wait */
-window.setTimeout(function () {
-  window.setInterval(spawnEnemy, enemySpawnFrequency);
-  // window.setTimeout(spawnEnemy, enemySpawnFrequency);
+setTimeout(function () {
+  setInterval(spawnEnemy, enemySpawnFrequency);
 }, 3000);
 
 /* start periodically spawning coins after an initial wait */
-window.setTimeout(function () {
-  window.setInterval(spawnCoin, coinSpawnFrequency);
+setTimeout(function () {
+  setInterval(spawnCoin, coinSpawnFrequency);
 }, 5000);
 
 function setupScene() {
@@ -78,17 +77,20 @@ function setupScene() {
 
   /* temp shadow */
   // var shadow = new THREE.EllipseCurve();
-
-  /* initialise the boost trail */
-  // for (var i = 0 ; i < boostTrail.array.length ; i++) {
-  //   boostTrail.array[i] = JSON.parse(JSON.stringify(ball));
-  // }
 }
 
 /* Main game loop */
 function run(gamepadSnapshot) {
+
+  var now = new Date().getTime();
+  var frameDuration = now - lastTimeCalled;
+  lastTimeCalled = now;
+
+  dt = (frameDuration * 60 / 1000) * 0.85;
+
   draw();
   update(gamepadSnapshot);
+
 }
 
 /* Draw the game elements */
@@ -98,6 +100,7 @@ function draw() {
 
 /* Update game elements, create events etc. */
 function update(gamepadSnapshot) {
+
   /* Take input from the gamepad joystick */
   ball.acceleration.x = ball.maxAcceleration * gamepadSnapshot.axes[0];
   /* negative sign for y acceleration because on the joystick the
@@ -151,10 +154,10 @@ function update(gamepadSnapshot) {
   camera.rotation.y = -0.001 * ball.position.x;
 
 
-  if (gamepadSnapshot.buttons[2].pressed) {
-    var outside = offscreenCheck.isOffscreen(ball, camera);
-    console.log(timeAliveInSec + (outside ? " is offscreen" : " is on-screen"));
-  }
+  // if (gamepadSnapshot.buttons[2].pressed) {
+  //   var outside = offscreenCheck.isOffscreen(ball, camera);
+  //   console.log(timeAliveInSec + (outside ? " is offscreen" : " is on-screen"));
+  // }
 
   if (gamepadSnapshot.buttons[6].pressed)
   {
@@ -185,6 +188,7 @@ function update(gamepadSnapshot) {
     boostCountdownId = window.setInterval(boostCountdown, 1000);
 
     /* boost mode dies out after some time */
+    // setTimeout(function () {
     window.setTimeout(function () {
       boostModeOn = false;
       boostModeTimeLeft = boostModeDuration;
@@ -444,7 +448,7 @@ function spawnCoin() {
   scene.add(coin);
   coins[coinId++] = coin;
 
-  coin.timeout = window.setTimeout(function () {
+  coin.timeout = setTimeout(function () {
     scene.remove(coins[coin.id]);
     delete coins[coin.id];
   }, coinLifetime);
@@ -471,7 +475,7 @@ function coinPhysics(key) {
 
 function coinCollected(coin) {
   /* clear the removal timeout for the coin */
-  window.clearTimeout(coin.timeout);
+  clearTimeout(coin.timeout);
 
   /* remove the coin from the game */
   scene.remove(coin)
@@ -510,7 +514,7 @@ function spawnFragments(spawnPos) {
     scene.add(explosionFragment);
   }
   /* set a timeout to clear the fragments after a while */
-  window.setTimeout(clearFragments, fragmentLifetime);
+  setTimeout(clearFragments, fragmentLifetime);
 }
 
 function clearFragments() {
@@ -565,13 +569,16 @@ function enemyPhysics(key) {
   // }
 
   if ((xx*xx + yy*yy > bounds + boundsTolerance)) {
+
     if (currEnemy.removeTimeout) { clearTimeout(currEnemy.removeTimeout); }
 
     scene.remove(currEnemy);
     delete enemies[key];
     // delete indicators[key];
+
   }
   else {
+
     /* check for a collision */
     if (collisionBetween(currEnemy, ball)) {
       youDied(deathCauseEnum.ENEMY_CONTACT);
@@ -583,5 +590,7 @@ function enemyPhysics(key) {
 
     currEnemy.position.x += currEnemy.velocity.x * dt;
     currEnemy.position.y += currEnemy.velocity.y * dt;
+
   }
+
 }
