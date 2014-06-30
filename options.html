@@ -1,28 +1,28 @@
 <!doctype html>
 <html>
 <head>
-  <title>Dodgebomb</title>
+  <title>Dodgebomb | Options</title>
   <script src="js/gamepad.js"></script>
   <link href="css/index.css" rel="stylesheet">
-  <script src="http://jsconsole.com/remote.js?12038A8C-CD4F-4506-9F79-9B0CD56E0925"></script>
 </head>
 <body>
 
   <div id="menu">
 
-    <h1>Dodgebomb</h1>
+    <h1>Options</h1>
     <h4>High Score: <span id="highscore"></span></h4>
 
-    <div id="menu0" class="menuItems">New Game</div>
-    <div id="menu1" class="menuItems">Options</div>
-    <div id="menu2" class="menuItems">Help</div>
+    <div id="menu0" class="menuItems">Sounds: On</div>
+    <div id="menu1" class="menuItems">Reset High Score</div>
+    <div id="menu2" class="menuItems">Back</div>
 
   </div>
   <!-- <div id="debugger"></div> -->
 
-  <script src="js/splash.js"></script>
+  <script src="js/options.js"></script>
 
   <script>
+
   var highscoreSpan = document.getElementById('highscore');
   var localStorageHighScore = localStorage.dodgeBombHighScore;
   if (typeof localStorageHighScore == 'undefined') {
@@ -30,6 +30,11 @@
   } else {
     highscoreSpan.innerHTML = localStorageHighScore;
   }
+
+  if (localStorage.dodgeBombMute) {
+    document.getElementById('menu0').innerHTML = "Sounds: Off";
+  }
+
   </script>
 
 </body>

@@ -2,11 +2,10 @@
 /* http://learningthreejs.com/blog/2012/01/20/casting-shadows/ */
 
 /* load stats: https://github.com/mrdoob/stats.js/blob/master/examples/basic.html */
-var stats = new Stats();
-document.body.appendChild(stats.domElement);
+// var stats = new Stats();
+// document.body.appendChild(stats.domElement);
 
 var renderer, camera, scene, spotLight;
-// var composer;
 
 /* enemies! */
 

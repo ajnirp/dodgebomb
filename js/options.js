@@ -28,8 +28,14 @@ function drawBorderAroundCurrent() {
 
 }
 
+/* A quick hack to get around the fact that a gamepad button press
+ * can register multiple times. The first time the buttonpress is
+ * registered, this variable is set to true and a timeout for it to
+ * get reset to false is set */
+var blockToggleSound = false;
+
 function selectMenuItem() {
-  
+
   // document.getElementById("debugger").innerHTML = currItem;
   var gamepadSnap = navigator.getGamepads()[0];
 
@@ -58,19 +64,38 @@ function selectMenuItem() {
     switch(currItem) {
 
     case 0:
-      /* new game */
-      window.location.replace("game.html");
+      /* toggle sound */
+
+      if (!blockToggleSound) {
+
+        blockToggleSound = true;
+        window.setTimeout(function () { blockToggleSound = false; }, 400);
+
+        localStorage.dodgeBombMute = !localStorage.dodgeBombMute;
+
+        var soundStatusDisplayDiv  = document.getElementById('menu0');
+
+        if (localStorage.dodgeBombMute) {
+          soundStatusDisplayDiv.innerHTML = "Sounds: Off";
+        } else if (!localStorage.dodgeBombMute) {
+          soundStatusDisplayDiv.innerHTML = "Sounds: On";
+        }
+
+      }
+
       break;
 
     case 1:
-      /* options */
-      window.location.replace("options.html");
+      /* reset highscore */
+      localStorage.dodgeBombHighScore = 0;
+      document.getElementById('highscore').innerHTML = 0;
       break;
 
     case 2:
-      /* help */
+      /* back */
+      window.location.replace("index.html");
       break;
-      
+
     }
 
   }

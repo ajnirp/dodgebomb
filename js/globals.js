@@ -249,7 +249,9 @@ var gameOptions = {
 
   gameOver: false,
 
-  mute: false,
+  /* use the ternary operator because localStorage.dodgeBombMute
+   * could also be undefined */
+  mute: localStorage.dodgeBombMute ? true : false,
 
   pauseDisplayDiv: document.getElementById("pauseDisplay"),
 
