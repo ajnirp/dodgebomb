@@ -7,14 +7,30 @@
   <script src="http://jsconsole.com/remote.js?12038A8C-CD4F-4506-9F79-9B0CD56E0925"></script>
 </head>
 <body>
+
   <div id="menu">
+
     <h1>Dodgebomb</h1>
+    <h3>High Score: <span id="highscore"></span></h3>
+
     <div id="menu0" class="menuItems">New Game</div>
     <div id="menu1" class="menuItems">Options</div>
     <div id="menu2" class="menuItems">Help</div>
-    <div id="menu3" class="menuItems">High Scores</div>
+
   </div>
   <!-- <div id="debugger"></div> -->
+
   <script src="js/splash.js"></script>
+
+  <script>
+  var highscoreSpan = document.getElementById('highscore');
+  var localStorageHighScore = localStorage.dodgeBombHighScore;
+  if (typeof localStorageHighScore == 'undefined') {
+    highscoreSpan.innerHTML = 0;
+  } else {
+    highscoreSpan.innerHTML = localStorageHighScore;
+  }
+  </script>
+
 </body>
 </html>

@@ -1,5 +1,5 @@
 var currItem = 0;
-var totalItems = 4;
+var totalItems = 3;
 
 var blockGamepad = false;
 
@@ -54,7 +54,26 @@ function selectMenuItem() {
 
   else if (gamepadSnap.buttons[0].pressed) {
 
-    window.location.replace("game.html");
+    switch(currItem) {
+
+    case 0:
+      /* new game */
+      window.location.replace("game.html");
+      break;
+
+    case 1:
+      /* options */
+      break;
+
+    case 2:
+      /* help */
+      break;
+
+    case 3:
+      /* high score */
+      break;
+      
+    }
 
   }
 

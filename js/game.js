@@ -407,10 +407,6 @@ function newBall() {
     clearTimeout(boostCountdownId);
   }
 
-  /* reset score by resetting coinsCollected */
-  coinsCollected = 0;
-  scoreDisplaySpan.innerHTML = 0;
-
 }
 
 function ballPhysics(b) {
@@ -740,7 +736,11 @@ function resetGame(gamepadSnapshot) {
 
   lastTimeRunCalled = undefined;
 
+  /* game no longer over! */
   gameOptions.gameOver = false;
+
+  /* update the highscore */
+  updateHighScore(100 * coinsCollected);
 
   /* clear messages from the screen */
   document.getElementById("newBallCountdownDisplay").innerHTML = "";
@@ -749,9 +749,9 @@ function resetGame(gamepadSnapshot) {
   /* reset time alive */
   timeAliveInSec = 0;
 
-  /* reset scoring */
-  score = 0;
+  /* highscore has been updated, now we can reset scoring */
   coinsCollected = 0;
+  scoreDisplaySpan.innerHTML = 0;
 
   /* reset boost mode settings */
   boostModeOn = false;
@@ -790,5 +790,17 @@ function resetGame(gamepadSnapshot) {
 
   /* call the run function again! */
   run(gamepadSnapshot);
+
+}
+
+function updateHighScore(scr) {
+
+  var localStorageHighScore = localStorage.dodgeBombHighScore;
+  if (typeof(localStorageHighScore) == 'undefined' || localStorageHighScore < scr) {
+
+    localStorage.dodgeBombHighScore = scr;
+    console.log("updated high score to " + scr);
+
+  }
 
 }
