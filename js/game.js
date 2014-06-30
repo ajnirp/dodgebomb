@@ -197,7 +197,7 @@ function update(gamepadSnapshot) {
   // }
 
   /* Update the FPS counter */
-  stats.update();
+  // stats.update();
 }
 
 function youDied(deathCause) {
@@ -786,6 +786,11 @@ function resetGame(gamepadSnapshot) {
   ball.position.x = 0;
   ball.position.y = 0;
   ball.position.z = ballRadius + 200;
+
+  /* make sure it falls straight down */
+  ball.velocity.x = 0;
+  ball.velocity.y = 0;
+  ball.velocity.z = 0;
 
   /* call the run function again! */
   run(gamepadSnapshot);

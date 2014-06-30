@@ -40,7 +40,7 @@ h1 { text-align: center; }
 
 .controlButtons:active { position: relative; top: 1px; }
 
-#stats { position: absolute; bottom:0; left: 0 }
+/*#stats { position: absolute; bottom:0; left: 0 }*/
 
 #infoDisplay {
 	text-align: center;
