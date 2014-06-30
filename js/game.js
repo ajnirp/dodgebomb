@@ -27,6 +27,7 @@ setTimeout(function () {
 }, 5000);
 
 function setupScene() {
+
   /* set up renderer */
 	renderer = new THREE.WebGLRenderer();
   renderer.setSize(WIDTH, HEIGHT);
@@ -77,6 +78,7 @@ function setupScene() {
 
   /* temp shadow */
   // var shadow = new THREE.EllipseCurve();
+
 }
 
 /* Main game loop */
@@ -172,29 +174,28 @@ function update(gamepadSnapshot) {
   // boostTrail.shiftTrail(JSON.parse(JSON.stringify(ball)), scene);
 
   // /* activate boost mode! */
-  if (!boostModeOn &&
-       boostModeAvailable &&
-       gamepadSnapshot.buttons[3].pressed)
-  {
-    boostModeOn = true;
-    boostModeAvailable = false;
-    boostModeTimeLeft = boostModeDuration;
-    ballMaxVelocity = 10;
-    ballMaxAcceleration = 10;
+  // if (!boostModeOn &&
+  //      boostModeAvailable &&
+  //      gamepadSnapshot.buttons[3].pressed)
+  // {
+  //   boostModeOn = true;
+  //   boostModeAvailable = false;
+  //   boostModeTimeLeft = boostModeDuration;
+  //   ballMaxVelocity = 10;
+  //   ballMaxAcceleration = 10;
 
-    /* start showing a countdown */
-    boostCountdownId = window.setInterval(boostCountdown, 1000);
+  //   /* start showing a countdown */
+  //   boostCountdownId = window.setInterval(boostCountdown, 1000);
 
-    /* boost mode dies out after some time */
-    // setTimeout(function () {
-    window.setTimeout(function () {
-      boostModeOn = false;
-      boostModeTimeLeft = boostModeDuration;
-      boostModeDisplay.innerHTML = "";
-      window.clearInterval(boostCountdownId);
-    }, boostModeDuration);
+  //   /* boost mode dies out after some time */
+  //   // setTimeout(function () {
+  //   window.setTimeout(function () {
+  //     boostModeOn = false;
+  //     boostModeTimeLeft = boostModeDuration;
+  //     window.clearInterval(boostCountdownId);
+  //   }, boostModeDuration);
 
-  }
+  // }
 
   /* Update the FPS counter */
   stats.update();
@@ -208,25 +209,62 @@ function youDied(deathCause) {
     timeAliveInSec = 0;
 
   }
+
   else {
 
-    spawnFragments({
+    decreaseLife();
 
-      x: ball.position.x,
-      y: ball.position.y,
-      z: ball.position.z
+    if (livesLeft) {
 
-    });
+      spawnFragments({
 
-    /* and finally, kill off the current ball and get a new one */
-    newBall();
-    timeAliveInSec = 0;
+        x: ball.position.x,
+        y: ball.position.y,
+        z: ball.position.z
+
+      });
+
+      newBall();
+      timeAliveInSec = 0;
+
+    }
 
   }
 
 }
 
+function decreaseLife() {
+
+  if (livesLeft) {
+
+    var lifeToRemoveDiv = document.getElementById("life" + livesLeft);
+    lifeToRemoveDiv.style.visibility = "hidden";
+    livesLeft--;
+
+  }
+
+  else {
+
+    gameOver();
+
+  }
+
+}
+
+function gameOver() {
+
+  var gameOverMessageDiv = document.getElementById('newBallCountdownDisplay');
+  var pressAnyKeyMessageDiv = document.getElementById('pressAnyKeyMessage');
+
+  gameOverMessageDiv.innerHTML = "GAME OVER";
+  pressAnyKeyMessageDiv.innerHTML = "Push any button to continue!";
+
+  gameOptions.gameOver = true;
+
+}
+
 function setupEnemy(speed) {
+
   var angle = Math.random() * 2 * Math.PI;
 
   var enemyRadius = Math.floor(Math.random() * (enemyRadiusMax - enemyRadiusMin + 1)) + enemyRadiusMin;
@@ -259,9 +297,11 @@ function setupEnemy(speed) {
                    enemyRadius,
                    enemyGeometry[enemyRadius - enemyRadiusMin]
                    );
+
 }
 
 function spawnEnemy() {
+
   var enemy = setupEnemy(3);
 
   enemy.id = enemyId;
@@ -280,6 +320,7 @@ function spawnEnemy() {
       }, 2000);
     }
   }, 2*enemySpawnFrequency);
+
 }
 
 /* initialise a ball */
@@ -336,6 +377,9 @@ function newBallCountdown() {
 }
 
 function newBall() {
+
+  if (gameOptions.gameOver) return;
+
   newBallCountdown();
 
   /* place the ball a little above the center of the ground */
@@ -354,13 +398,10 @@ function newBall() {
   ball.maxAcceleration = 4;
   ball.maxVelocity = 5;
 
-  // ball.state = ballStateEnum.IN_THE_AIR;
-
   /* boost mode available again */
   boostModeOn = false;
   boostModeAvailable = true;
   boostModeTimeLeft = boostModeDuration;
-  boostModeDisplay.innerHTML = "";
 
   if (boostCountdownId) {
     clearTimeout(boostCountdownId);
@@ -369,6 +410,7 @@ function newBall() {
   /* reset score by resetting coinsCollected */
   coinsCollected = 0;
   scoreDisplaySpan.innerHTML = 0;
+
 }
 
 function ballPhysics(b) {
@@ -429,10 +471,20 @@ function ballPhysics(b) {
    * On the other hand, if the ball is within bounds, bounce it off
    * the ground */
   if (b.state == ballStateEnum.FALLING_OFF) {
+
     if (b.position.z < -80) {
-      b.state = ballStateEnum.IN_THE_AIR;
-      newBall();
+
+      decreaseLife();
+
+      if (livesLeft) {
+
+        b.state = ballStateEnum.IN_THE_AIR;
+        newBall();
+
+      }
+
     }
+
   }
   else {
     if (b.position.z < b.radius) {
@@ -673,7 +725,7 @@ function enemyPhysics(key) {
 
     }
 
-    /* move the enemy */
+    /* move the enemy */ 
     currEnemy.velocity.x += 0.00065 * (ball.position.x - currEnemy.position.x);
     currEnemy.velocity.y += 0.00065 * (ball.position.y - currEnemy.position.y);
 
@@ -681,5 +733,62 @@ function enemyPhysics(key) {
     currEnemy.position.y += currEnemy.velocity.y * dt;
 
   }
+
+}
+
+function resetGame(gamepadSnapshot) {
+
+  lastTimeRunCalled = undefined;
+
+  gameOptions.gameOver = false;
+
+  /* clear messages from the screen */
+  document.getElementById("newBallCountdownDisplay").innerHTML = "";
+  document.getElementById("pressAnyKeyMessage").innerHTML = "";
+
+  /* reset time alive */
+  timeAliveInSec = 0;
+
+  /* reset scoring */
+  score = 0;
+  coinsCollected = 0;
+
+  /* reset boost mode settings */
+  boostModeOn = false;
+  boostModeAvailable = true;
+  boostModeTimeLeft = boostModeDuration;
+
+  /* reset number of lives left */
+  livesLeft = 5;
+  for (var i = 1 ; i <= livesLeft ; i++) {
+
+    var lifeDisplayDiv = document.getElementById("life" + i);
+    lifeDisplayDiv.style.visibility = "visible";
+
+  }
+
+  /* remove all enemies */
+  for (var key in enemies) {
+
+    scene.remove(enemies[key]);
+    delete enemies[key];
+
+  }
+
+  /* remove all coins */
+  for (var key in coins) {
+
+    scene.remove(coins[key]);
+    delete coins[key];
+
+  }
+
+  /* reposition the ball */
+  ball.position.x = 0;
+  ball.position.y = 0;
+  ball.position.z = ballRadius + 200;
+
+  /* call the run function again! */
+  run(gamepadSnapshot);
 
 }

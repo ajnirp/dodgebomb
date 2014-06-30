@@ -8,21 +8,45 @@
     <link href="css/style.css" rel="stylesheet">
   </head>
   <body>
+
     <div id="pauseDisplay" class="absolutelyCentered"></div>
+
+    <!-- <div id="gameOverDisplay" class="absolutelyCentered">
+      
+    </div> -->
+
     <div id="newBallCountdownDisplay" class="absolutelyCentered"></div>
+    <!-- <div id="gameOverMessage"></div> -->
+    <div id="pressAnyKeyMessage" class="absolutelyCentered"></div>
 
     <div id="infoDisplay">
+
       <div id="timeDisplay">
         Time <span id="timeAlive">0</span>
       </div>
+
       <div id="coinDisplay">
         Score <span id="scoreDisplay">0</span>
       </div>
-      <div id="boostModeDisplay">
+
+      <div id="livesDisplay" class="absolutelyCenteredAlongTop">
+        <div id="life1" class="circle"></div>
+        <div id="life2" class="circle"></div>
+        <div id="life3" class="circle"></div>
+        <div id="life4" class="circle"></div>
+        <div id="life5" class="circle"></div>
+        <!-- <svg height="40" width="40"><circle cx=></circle></svg> -->
       </div>
+
+      <div class="absolutelyCentered">
+        <h1 id="gameoverHeader1" class="largeText"></h1>
+        <h2 id="gameoverHeader2"></h2>
+      </div>
+
     </div>
+
     <div id="gameCanvas"></div>
-    <script src="http://jsconsole.com/remote.js?E52401BD-F37A-4EBB-AFFA-12DC22470DFF"></script>
+    <script src="http://jsconsole.com/remote.js?8AA5DEA0-D00B-406F-8B99-4ECB3C7732D4"></script>
 
     <script src="js/third-party/stats.min.js"></script>
     <script src="js/third-party/three.min.js"></script>
@@ -47,12 +71,8 @@
     <script src="js/gamepad.js"></script>
     <script src="js/camera.js"></script>
     <script src="js/game.js"></script>
-    <script src="js/enemies.js"></script>
-    <script src="js/coins.js"></script>
     
     <script src="js/timer.js"></script>
-
-    <!-- script src="js/spotlight.js"></script -->
     <script>
       setupScene();
       gamepadSupport.tick();

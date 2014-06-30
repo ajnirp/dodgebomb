@@ -247,6 +247,8 @@ var gameOptions = {
 
   displayScore: true,
 
+  gameOver: false,
+
   mute: false,
 
   pauseDisplayDiv: document.getElementById("pauseDisplay"),
@@ -307,3 +309,9 @@ var sounds = {
   
 //   material: new THREE.MeshPhongMaterial()
 // }
+
+////////////////////////////////////////////////////////////////////////////////
+
+/* Lives left, game over, etc. */
+
+var livesLeft = 5;

@@ -71,3 +71,20 @@ todo
 	show/hide score by pressing button - maybe not?
 	options - mute etc. also, should be able to access options during the game itself
 	better logo!
+
+final todo
+	remove bug wherein fragments seem to act like boost mode is always on if it is turned on once
+	add cylindrical walls going down from the edges
+	make camera follow ball down as it falls
+	level up after a certain number of coins
+	higher levels
+		enemies move faster [?]
+		coinSpawnFrequency increases
+		enemySpawnFrequency increases
+	finite number of lives - game over - any button takes you to the index.html page
+	powerups
+		coins around the perimeter
+		extra life
+		stop all enemies
+		boost mode
+		spotlight becomes more powerful

@@ -63,15 +63,6 @@ h1 { text-align: center; }
 	background-color: #207CE6;
 }
 
-#boostModeDisplay {
-	width: 200px;
-	border-radius: 25px;
-	position: absolute;
-	left: 50%;
-	margin-left: -100px;
-	background-color: #119C2D;
-}
-
 .absolutelyCentered {
 	position: absolute;
 	text-align: center;
@@ -81,6 +72,15 @@ h1 { text-align: center; }
 	color: white;
 	font-size: 64px;
 }
+
+
+.absolutelyCenteredAlongTop {
+	position: absolute;
+	text-align: center;
+	z-index: 1000;
+	left: 50%;
+}
+
 #pauseDisplay {
 	width: 500px;
 	margin-left: -250px;
@@ -88,6 +88,37 @@ h1 { text-align: center; }
 
 #newBallCountdownDisplay {
 	border-radius: 30px;
-	width: 50px;
-	margin-left: -25px;
+	width: 500px;
+	margin-left: -250px;
+}
+
+#gameoverHeader1 {
+	width: 650px;
+	margin-left: -325px;
+}
+
+#gameoverHeader2 {
+	width: 700px;
+	margin-left: -350px;
+}
+
+#livesDisplay {
+	width: 300px;
+	margin-left: -150px;
+}
+
+.circle {
+	border-radius: 50%;
+	display: inline-block;
+	margin-right: 5px;
+	background: red;
+	width: 25px;
+	height: 25px;
+}
+
+#pressAnyKeyMessage {
+	font-size: 36px;
+	width: 700px;
+	margin-left: -350px;
+	top: 70%;
 }
