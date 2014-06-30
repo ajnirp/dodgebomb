@@ -306,11 +306,20 @@ var sounds = {
 
 }
 
-// var powerup = {
-//   radius: 10;
-  
-//   material: new THREE.MeshPhongMaterial()
-// }
+////////////////////////////////////////////////////////////////////////////////
+
+/* object that stores all powerups */
+var powerups = {};
+
+var powerupId = 0;
+
+/* how long does a powerup remain in the game? */
+var powerupLifetime = 10000;
+
+/* powerups are pyramid-shaped */
+var powerupGeometry = new THREE.CylinderGeometry(0, 10, 20, 4);
+
+var powerupMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
 ////////////////////////////////////////////////////////////////////////////////
 

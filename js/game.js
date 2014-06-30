@@ -543,6 +543,7 @@ function spawnCoin() {
   }, coinLifetime);
 
   return coin;
+
 }
 
 function coinPhysics(key) {
@@ -607,6 +608,7 @@ function coinPhysics(key) {
 }
 
 function coinCollected(coin) {
+
   /* clear the removal timeout for the coin */
   clearTimeout(coin.timeout);
 
@@ -619,6 +621,102 @@ function coinCollected(coin) {
   
   /* update the number of coins collected and display the new score */
   scoreDisplaySpan.innerHTML = 100 * (++coinsCollected);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+function spawnPowerup(powerupType) {
+
+  var powerup = new THREE.Mesh(powerupGeometry, powerupMaterial);
+  powerup.type = powerupType;
+
+  var rad = Math.pow(Math.random(), 0.5) * groundRadius;
+  var theta = 2 * Math.PI * Math.random();
+
+  var spawnX = rad * Math.cos(theta);
+  var spawnY = rad * Math.sin(theta);
+  var spawnZ = 200;
+
+  powerup.position.set(spawnX, spawnY, spawnZ);
+  powerup.velocity = { x: 0, y: 0, z: 0 };
+
+  powerup.state = coinStateEnum.IN_THE_AIR;
+
+  powerup.id = powerupId;
+  scene.add(powerup);
+  powerups[powerupId++] = powerup;
+
+  powerup.pickedUp = false;
+
+  powerup.timeout = setTimeout(function () {
+    scene.remove(powerups[powerup.id]);
+    delete powerups[powerup.id];
+  }, powerupLifetime);
+
+  return powerup;
+  
+}
+
+function powerupPhysics(key) {
+
+  var powerup = powerups[key];
+
+  /* rotate the coin if it is on the ground */
+  if (powerup.state == coinStateEnum.NORMAL) {
+
+    powerup.rotation.z += 0.1;
+
+  }
+
+  else if (powerup.state == coinStateEnum.IN_THE_AIR) {
+
+    /* coins only move in the up-down direction */
+    powerup.velocity.z -= gravity * dt;
+
+    var newPosition = powerup.position.z + powerup.velocity.z * dt;
+
+    if (newPosition < coinRadius) {
+
+      /* no more bouncing */
+      if (Math.abs(powerup.velocity.z) < ballInAirTolerance)  {
+
+        powerup.position.z = coinRadius;
+        powerup.velocity.z = 0;
+        powerup.state = coinStateEnum.NORMAL;
+
+      }
+
+      /* the powerup lives to see another bounce! */
+      else {
+
+        powerup.velocity.z *= -1 * groundRestitutionCoefficient;
+        powerup.state = coinStateEnum.IN_THE_AIR;
+
+      }
+
+    }
+
+    else {
+
+      powerup.position.z = newPosition;
+
+    }
+
+  }
+
+  /* check for a powerup pickup */
+  var xx = ball.position.x - coin.position.x;
+  var yy = ball.position.y - coin.position.y;
+  var zz = ball.position.z - coin.position.z;
+
+  var min_dist = ballRadius + coinThickness + coinPickupTolerance;
+  
+  if (xx*xx + yy*yy + zz*zz < min_dist*min_dist && !powerup.pickedUp) {
+    powerup.pickedUp = true;
+    coinCollected(powerup);
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
