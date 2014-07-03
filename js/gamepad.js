@@ -32,17 +32,19 @@ var gamepadSupport = {
     gamepadSupport.pollGamepads();
     var gamepadSnap = navigator.getGamepads()[0];
 
-    // if (gamepadSnap.buttons[7].pressed) {
+    if (gamepadSnap.buttons[7].pressed) {
 
-    //   gameOptions.togglePause();
-    //   // TimeoutManager.togglePause();
-    //   // IntervalManager.togglePause();
+      gameOptions.togglePause();
+      // TimeoutManager.togglePause();
+      // IntervalManager.togglePause();
       
-    // }
+    }
 
     if (!gameOptions.gameOver) {
 
-      run(gamepadSnap);
+      if (!gameOptions.paused) {
+        run(gamepadSnap);
+      }
       
     }
 
@@ -64,7 +66,7 @@ var gamepadSupport = {
           gamepadSnap.buttons[11].pressed)
       {
 
-        resetGame(navigator.getGamepads()[0]);
+        reset.game(navigator.getGamepads()[0]);
 
       }
 

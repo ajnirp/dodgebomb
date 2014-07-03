@@ -25,6 +25,11 @@ setTimeout(function () {
   setInterval(spawnCoin, coinSpawnFrequency);
 }, 5000);
 
+/* start randomly spawning powerups after an initial wait */
+setTimeout(function () {
+  randomlySpawnPowerup();
+}, 5000);
+
 function setupScene() {
 
   /* set up renderer */
@@ -131,6 +136,11 @@ function update(gamepadSnapshot) {
     coinPhysics(key); 
   }
 
+  /* physics for each powerup */
+  for (var key in powerups) {
+    powerupPhysics(key); 
+  }
+
   /* phatak boom */
   for (var i = 0 ; i < explosionFragments.length ; i++) {
     var fragment = explosionFragments[i];
@@ -171,30 +181,6 @@ function update(gamepadSnapshot) {
 
   /* draw the boost trail */
   // boostTrail.shiftTrail(JSON.parse(JSON.stringify(ball)), scene);
-
-  // /* activate boost mode! */
-  // if (!boostModeOn &&
-  //      boostModeAvailable &&
-  //      gamepadSnapshot.buttons[3].pressed)
-  // {
-  //   boostModeOn = true;
-  //   boostModeAvailable = false;
-  //   boostModeTimeLeft = boostModeDuration;
-  //   ballMaxVelocity = 10;
-  //   ballMaxAcceleration = 10;
-
-  //   /* start showing a countdown */
-  //   boostCountdownId = window.setInterval(boostCountdown, 1000);
-
-  //   /* boost mode dies out after some time */
-  //   // setTimeout(function () {
-  //   window.setTimeout(function () {
-  //     boostModeOn = false;
-  //     boostModeTimeLeft = boostModeDuration;
-  //     window.clearInterval(boostCountdownId);
-  //   }, boostModeDuration);
-
-  // }
 
   /* Update the FPS counter */
   // stats.update();
@@ -397,14 +383,7 @@ function newBall() {
   ball.maxAcceleration = 4;
   ball.maxVelocity = 5;
 
-  /* boost mode available again */
-  boostModeOn = false;
-  boostModeAvailable = true;
-  boostModeTimeLeft = boostModeDuration;
-
-  if (boostCountdownId) {
-    clearTimeout(boostCountdownId);
-  }
+  reset.allPowerups();
 
 }
 
@@ -641,6 +620,9 @@ function spawnPowerup(powerupType) {
   powerup.position.set(spawnX, spawnY, spawnZ);
   powerup.velocity = { x: 0, y: 0, z: 0 };
 
+  /* powerup points upwards */
+  powerup.rotation.x = Math.PI / 2;
+
   powerup.state = coinStateEnum.IN_THE_AIR;
 
   powerup.id = powerupId;
@@ -656,6 +638,50 @@ function spawnPowerup(powerupType) {
 
   return powerup;
   
+}
+
+function randomlySpawnPowerup() {
+
+  var temp_powerupTypeInt = Math.floor(Math.random() * 6);
+  var temp_powerupType;
+
+  switch (temp_powerupTypeInt) {
+
+    case 0:
+      temp_powerupType = powerupTypeEnum.COINS;
+      break;
+
+    case 1:
+      temp_powerupType = powerupTypeEnum.BOOST;
+      break;
+
+    case 2:
+      temp_powerupType = powerupTypeEnum.SLOW_ENEMIES;
+      break;
+
+    case 3:
+      temp_powerupType = powerupTypeEnum.STOP_ENEMIES;
+      break;
+
+    case 4:
+      temp_powerupType = powerupTypeEnum.GROW_BIG;
+      break;
+
+    case 5:
+      temp_powerupType = powerupTypeEnum.GROW_SMALL;
+      break;
+
+  }
+
+  spawnPowerup(temp_powerupType);
+
+  /* next spawn between 20 and 25 seconds from now */
+  var nextTimeToSpawn = Math.floor(Math.random() * 6) + 20;
+
+  window.setTimeout(function () {
+    randomlySpawnPowerup();
+  }, nextTimeToSpawn * 1000);
+
 }
 
 function powerupPhysics(key) {
@@ -706,22 +732,196 @@ function powerupPhysics(key) {
   }
 
   /* check for a powerup pickup */
-  var xx = ball.position.x - coin.position.x;
-  var yy = ball.position.y - coin.position.y;
-  var zz = ball.position.z - coin.position.z;
+  var xx = ball.position.x - powerup.position.x;
+  var yy = ball.position.y - powerup.position.y;
+  var zz = ball.position.z - powerup.position.z;
 
   var min_dist = ballRadius + coinThickness + coinPickupTolerance;
   
   if (xx*xx + yy*yy + zz*zz < min_dist*min_dist && !powerup.pickedUp) {
     powerup.pickedUp = true;
-    coinCollected(powerup);
+    powerupCollected(powerup);
+  }
+
+}
+
+function powerupCollected(powerup) {
+
+  window.clearTimeout(powerup.timeout);
+
+  var randomFloat = Math.random();
+
+  if (randomFloat < 0.33) {
+    lotsOfCoins();
+  } else if (randomFloat > 0.33 && randomFloat < 0.66) {
+    activateBoostMode();
+  } else {
+    slowDownEnemies();
+  }
+
+  scene.remove(powerup);
+  delete powerup;
+
+  return;
+
+  if (powerup.type == powerupTypeEnum.BOOST) {
+    activateBoostMode();
+  }
+  else if (powerup.type == powerupTypeEnum.COINS) {
+    lotsOfCoins();
+  }
+  else if (powerup.type == powerupTypeEnum.SLOW_ENEMIES) {
+    activateBoostMode();
+  }
+  else if (powerup.type == powerupTypeEnum.STOP_ENEMIES) {
+    activateBoostMode();
+  }
+  else if (powerup.type == powerupTypeEnum.GROW_BIG) {
+    lotsOfCoins();
+  }
+  else if (powerup.type == powerupTypeEnum.GROW_SMALL) {
+    lotsOfCoins();
+  }
+
+}
+
+/* activate boost mode! */
+function activateBoostMode() {
+
+  if (!boostModeOn &&
+       boostModeAvailable)
+  {
+    boostModeOn = true;
+    boostModeAvailable = false;
+    boostModeTimeLeft = boostModeDuration;
+    ballMaxVelocity = 10;
+    ballMaxAcceleration = 10;
+
+    /* start showing a countdown */
+    boostCountdownId = window.setInterval(boostCountdown, 1000);
+
+    /* boost mode dies out after some time */
+    // setTimeout(function () {
+    window.setTimeout(function () {
+      boostModeOn = false;
+      boostModeTimeLeft = boostModeDuration;
+      window.clearInterval(boostCountdownId);
+    }, boostModeDuration);
+
+  }
+
+}
+
+/* lots and lots of coins! */
+function lotsOfCoins() {
+  for (var i = 0 ; i < 20 ; i++) {
+    spawnCoin();
+  }
+}
+
+/* everyone except me, slow down! */
+function slowDownEnemies() {
+
+  enemyDisplacementMultiplier = 0.2;
+
+  window.setTimeout(function () {
+    enemyDisplacementMultiplier = 1;
+  }, 10000);
+
+}
+
+var reset = {
+
+  allPowerups: function () {
+
+    this.boostMode();
+    this.slowEnemies();
+
+  },
+
+  boostMode: function () {
+
+    /* boost mode available again */
+    boostModeOn = false;
+    boostModeAvailable = true;
+    boostModeTimeLeft = boostModeDuration;
+
+    if (boostCountdownId) {
+      clearTimeout(boostCountdownId);
+    }
+
+  },
+
+  slowEnemies: function () {
+    enemyDisplacementMultiplier = 1;
+  },
+
+  game: function(gamepadSnapshot) {
+
+    lastTimeRunCalled = undefined;
+
+    /* game no longer over! */
+    gameOptions.gameOver = false;
+
+    /* update the highscore */
+    updateHighScore(100 * coinsCollected);
+
+    /* clear messages from the screen */
+    document.getElementById("newBallCountdownDisplay").innerHTML = "";
+    document.getElementById("pressAnyKeyMessage").innerHTML = "";
+
+    /* reset time alive */
+    timeAliveInSec = 0;
+
+    /* highscore has been updated, now we can reset scoring */
+    coinsCollected = 0;
+    scoreDisplaySpan.innerHTML = 0;
+
+    /* reset number of lives left */
+    livesLeft = 5;
+    for (var i = 1 ; i <= livesLeft ; i++) {
+      var lifeDisplayDiv = document.getElementById("life" + i);
+      lifeDisplayDiv.style.visibility = "visible";
+    }
+
+    /* remove all coins, enemies and powerups */
+    deleteAll(enemies);
+    deleteAll(coins);
+    deleteAll(powerups);
+
+    /* reposition the ball */
+    ball.position.x = 0;
+    ball.position.y = 0;
+    ball.position.z = ballRadius + 200;
+
+    /* make sure it falls straight down */
+    ball.velocity.x = 0;
+    ball.velocity.y = 0;
+    ball.velocity.z = 0;
+
+    /* reset all powerups */
+    reset.allPowerups();
+
+    /* call the run function again! */
+    run(gamepadSnapshot);
+
   }
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+function deleteAll(things) {
+  for (var key in things) {
+    scene.remove(things[key]);
+    delete things[key];
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 function spawnFragments(spawnPos) {
+
   /* spawn a bunch of miniballs and make them explode away from the
    * center. Their velocity vectors should be from the center and
    * through a radius of the circle. The radii for each velocity
@@ -819,79 +1019,13 @@ function enemyPhysics(key) {
     }
 
     /* move the enemy */ 
-    currEnemy.velocity.x += 0.00065 * (ball.position.x - currEnemy.position.x);
-    currEnemy.velocity.y += 0.00065 * (ball.position.y - currEnemy.position.y);
+    currEnemy.velocity.x += 0.00065 * enemyDisplacementMultiplier * (ball.position.x - currEnemy.position.x);
+    currEnemy.velocity.y += 0.00065 * enemyDisplacementMultiplier * (ball.position.y - currEnemy.position.y);
 
     currEnemy.position.x += currEnemy.velocity.x * dt;
     currEnemy.position.y += currEnemy.velocity.y * dt;
 
   }
-
-}
-
-function resetGame(gamepadSnapshot) {
-
-  lastTimeRunCalled = undefined;
-
-  /* game no longer over! */
-  gameOptions.gameOver = false;
-
-  /* update the highscore */
-  updateHighScore(100 * coinsCollected);
-
-  /* clear messages from the screen */
-  document.getElementById("newBallCountdownDisplay").innerHTML = "";
-  document.getElementById("pressAnyKeyMessage").innerHTML = "";
-
-  /* reset time alive */
-  timeAliveInSec = 0;
-
-  /* highscore has been updated, now we can reset scoring */
-  coinsCollected = 0;
-  scoreDisplaySpan.innerHTML = 0;
-
-  /* reset boost mode settings */
-  boostModeOn = false;
-  boostModeAvailable = true;
-  boostModeTimeLeft = boostModeDuration;
-
-  /* reset number of lives left */
-  livesLeft = 5;
-  for (var i = 1 ; i <= livesLeft ; i++) {
-
-    var lifeDisplayDiv = document.getElementById("life" + i);
-    lifeDisplayDiv.style.visibility = "visible";
-
-  }
-
-  /* remove all enemies */
-  for (var key in enemies) {
-
-    scene.remove(enemies[key]);
-    delete enemies[key];
-
-  }
-
-  /* remove all coins */
-  for (var key in coins) {
-
-    scene.remove(coins[key]);
-    delete coins[key];
-
-  }
-
-  /* reposition the ball */
-  ball.position.x = 0;
-  ball.position.y = 0;
-  ball.position.z = ballRadius + 200;
-
-  /* make sure it falls straight down */
-  ball.velocity.x = 0;
-  ball.velocity.y = 0;
-  ball.velocity.z = 0;
-
-  /* call the run function again! */
-  run(gamepadSnapshot);
 
 }
 

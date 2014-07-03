@@ -150,19 +150,25 @@ var coinStateEnum = {
 /* enum for powerups */
 var powerupTypeEnum = {
   
-  JUMP: 0, /* higher jumps! */
+  COINS: 0, /* lots of coins! */
   BOOST: 1, /* boost mode! */
+  
   SLOW_ENEMIES: 2, /* enemies move much more slowly */
   STOP_ENEMIES: 3, /* all currently alive enemies stop and die */
+
   /* expander / shrinker powerups */
   GROW_BIG: 4,
-  GROW_SMALL: 5
+  GROW_SMALL: 5,
+
+  INVINCIBLE: 6 /* enemies cannot hit you! */
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 var enemySpawnFrequency = 2000; // msec
+
+var enemyDisplacementMultiplier = 1;
 
 /* checking if an object is offscreen */
 var offscreenCheck = {
@@ -255,6 +261,7 @@ var gameOptions = {
 
   pauseDisplayDiv: document.getElementById("pauseDisplay"),
 
+  /* debouncing for pause */
   pauseBlocked: false,
 
   togglePause: function () {
